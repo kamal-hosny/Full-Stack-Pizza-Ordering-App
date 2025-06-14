@@ -3,7 +3,7 @@ import Menu from "@/components/menu";
 import { db } from "@/lib/prisma";
 import { getBestSellers } from "@/server/db/products";
 const BestSellers = async () => {
-  const bestSellers = await getBestSellers()
+  const bestSellers = await getBestSellers(3)
   return (
     <section className="py-20 bg-gray-50">
       <div className="container px-4 mx-auto">

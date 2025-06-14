@@ -8,23 +8,46 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// generator dbml {
+//   provider = "dbml-generator"
+//   output   = "./schema.dbml"
+// }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  password      String
+  name          String
+  image         String?
+  phone         String?
+  streetAddress String?
+  postalCode    String?
+  city          String?
+  country       String?
+  createAt      DateTime       @default(now())
+  updateAt      DateTime       @updatedAt
+  orders        OrderProduct[]
+}
+
 model Product {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   name        String
   description String
   image       String
   order       Int
   basePrise   Float
-  createAt    DateTime @default(now())
-  updateAt    DateTime @updatedAt
-
-  Size   Size[]
-  extras Extra[]
+  createAt    DateTime       @default(now())
+  updateAt    DateTime       @updatedAt
+  orders      OrderProduct[]
+  Size        Size[]
+  extras      Extra[]
+  Category    Category?      @relation(fields: [categoryId], references: [id])
+  categoryId  String?
 }
 
 model Size {
@@ -41,6 +64,42 @@ model Extra {
   price     Float
   Product   Product         @relation(fields: [ProductId], references: [id])
   ProductId String
+}
+
+model Category {
+  id      String    @id @default(cuid())
+  name    String
+  order   Int       @default(autoincrement())
+  Product Product[]
+}
+
+model Order {
+  id            String         @id @default(uuid())
+  paid          Boolean        @default(false)
+  subTotal      Float
+  deliveryFee   Float
+  totalPrice    Float
+  userEmail     String
+  phone         String
+  streetAddress String
+  postalCode    String
+  city          String
+  country       String
+  createAt      DateTime       @default(now())
+  updateAt      DateTime       @updatedAt
+  product       OrderProduct[]
+}
+
+model OrderProduct {
+  id       String @id @default(uuid())
+  quantity Int
+
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+  user      User?   @relation(fields: [userId], references: [id])
+  userId    String?
+  Product   Product @relation(fields: [productId], references: [id])
+  productId String
 }
 
 enum ProductSize {
@@ -65,4 +124,9 @@ enum ExtraIngredient {
   PEPPERONI
   HAM
   PINEAPPLE
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
