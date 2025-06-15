@@ -15,23 +15,57 @@ import { Label } from "@radix-ui/react-label";
 import Image from "next/image";
 import { formatCurrency } from "@/lib/formatters";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Extra, Size } from "@prisma/client";
+import { Extra, ProductSize, Size } from "@prisma/client";
 import { ProductWithRelations } from "@/types/product";
-
-
-const sizes = [
-  { id: crypto.randomUUID(), name: "Default", price: 0 },
-  { id: crypto.randomUUID(), name: "Medium", price: 4 },
-  { id: crypto.randomUUID(), name: "Large", price: 8 },
-];
-
-const extras = [
-  { id: crypto.randomUUID(), name: "Cheese", price: 2 },
-  { id: crypto.randomUUID(), name: "Onion", price: 4 },
-  { id: crypto.randomUUID(), name: "Tomato", price: 8 },
-];
+import {
+  addCartItem,
+  removeCartItem,
+  removeItemFromCart,
+  selectCartItems,
+} from "@/redux/features/cart/cartSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import React, { useState } from "react";
+import { getItemQuantity } from "@/lib/cart";
 
 const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
+  const cart = useAppSelector(selectCartItems);
+  const quantity = getItemQuantity(item.id, cart);
+  const dispatch = useAppDispatch();
+
+  const defaultSize =
+    cart.find((element) => element.id === item.id)?.size ||
+    item.Size.find((size) => size.name === ProductSize.SMALL) ||
+    item.Size[0];
+
+  const defaultExtras =
+    cart.find((element) => element.id === item.id)?.extras || [];
+
+  const [selectedSize, setSelectedSize] = useState<Size>(defaultSize!);
+  const [selectedExtras, setSelectedExtras] = useState<Extra[]>(defaultExtras);
+
+  let totalPrice = item.basePrise;
+  if (selectedSize) {
+    totalPrice += selectedSize.price;
+  }
+  if (selectedExtras.length > 0) {
+    for (const extra of selectedExtras) {
+      totalPrice += extra.price;
+    }
+  }
+
+  const handleAddToCart = () => {
+    dispatch(
+      addCartItem({
+        basePrice: item.basePrise,
+        id: item.id,
+        image: item.image,
+        name: item.name,
+        size: selectedSize,
+        extras: selectedExtras,
+      })
+    );
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -79,7 +113,12 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
               </span>
               Select Size
             </h3>
-            <PickSize sizes={item.Size} item={item} />
+            <PickSize
+              sizes={item.Size}
+              item={item}
+              selectedSize={selectedSize}
+              setSelectedSize={setSelectedSize}
+            />
           </div>
 
           {/* Extras Selection */}
@@ -102,13 +141,17 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
               </span>
               Add Extras
             </h3>
-            <Extras extras={item.extras} />
+            <Extras
+              extras={item.extras}
+              selectedExtras={selectedExtras}
+              setSelectedExtras={setSelectedExtras}
+            />
           </div>
         </div>
 
         <DialogFooter className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 text-lg font-bold text-gray-800">
-            Total: {formatCurrency(item.basePrise)}
+            Total: {formatCurrency(totalPrice)}
           </div>
           <div className="flex gap-2">
             <DialogClose asChild>
@@ -119,12 +162,22 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
                 Cancel
               </Button>
             </DialogClose>
-            <Button
-              type="submit"
-              className="bg-primary hover:bg-primary/90 px-8 py-2 font-medium text-white"
-            >
-              Add to Cart
-            </Button>
+            {quantity === 0 ? (
+              <Button
+                type="submit"
+                onClick={handleAddToCart}
+                className="bg-primary hover:bg-primary/90 px-8 py-2 font-medium text-white"
+              >
+                Add to cart {formatCurrency(totalPrice)}
+              </Button>
+            ) : (
+              <ChooseQuantity
+                quantity={quantity}
+                item={item}
+                selectedSize={selectedSize}
+                selectedExtras={selectedExtras}
+              />
+            )}
           </div>
         </DialogFooter>
       </DialogContent>
@@ -134,11 +187,19 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
 
 export default AddToCartButton;
 
-function PickSize({ sizes, item }: { sizes: Size[]; item: ProductWithRelations }) {
-  console.log(sizes);
-
+function PickSize({
+  sizes,
+  item,
+  selectedSize,
+  setSelectedSize,
+}: {
+  sizes: Size[];
+  item: ProductWithRelations;
+  selectedSize: Size;
+  setSelectedSize: React.Dispatch<React.SetStateAction<Size>>;
+}) {
   return (
-    <RadioGroup defaultValue="comfortable" className="grid grid-cols-3 gap-3">
+    <RadioGroup defaultValue={selectedSize.id} className="grid grid-cols-3 gap-3">
       {sizes.map((size: Size) => (
         <div
           key={size.id}
@@ -146,9 +207,11 @@ function PickSize({ sizes, item }: { sizes: Size[]; item: ProductWithRelations }
         >
           <div className="flex flex-col items-center">
             <RadioGroupItem
-              value="default"
               id={size.id}
               className="h-5 w-5 text-primary"
+              value={size.id}
+              checked={selectedSize.id === size.id}
+              onClick={() => setSelectedSize(size)}
             />
             <Label htmlFor={size.id} className="mt-2 font-medium text-gray-800">
               {size.name}
@@ -163,7 +226,26 @@ function PickSize({ sizes, item }: { sizes: Size[]; item: ProductWithRelations }
   );
 }
 
-function Extras({ extras }: { extras: Extra[] }) {
+function Extras({
+  extras,
+  selectedExtras,
+  setSelectedExtras,
+}: {
+  extras: Extra[];
+  selectedExtras: Extra[];
+  setSelectedExtras: React.Dispatch<React.SetStateAction<Extra[]>>;
+}) {
+  const handleExtra = (extra: Extra) => {
+    if (selectedExtras.find((e) => e.id === extra.id)) {
+      const filteredSelectedExtras = selectedExtras.filter(
+        (item) => item.id !== extra.id
+      );
+      setSelectedExtras(filteredSelectedExtras);
+    } else {
+      setSelectedExtras((prev) => [...prev, extra]);
+    }
+  };
+
   return (
     <div className="space-y-2">
       {extras.map((extra: Extra) => (
@@ -172,16 +254,78 @@ function Extras({ extras }: { extras: Extra[] }) {
           className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
         >
           <div className="flex items-center">
-            <Checkbox id={extra.id} className="mr-3 h-5 w-5" />
+            <Checkbox
+              id={extra.id}
+              onClick={() => handleExtra(extra)}
+              checked={Boolean(selectedExtras.find((e) => e.id === extra.id))}
+              className="mr-3 h-5 w-5"
+            />
             <Label htmlFor={extra.id} className="font-medium text-gray-800">
               {extra.name}
             </Label>
           </div>
           <span className="text-primary font-medium">
-            +{formatCurrency(extra.price)}
+            {formatCurrency(extra.price)}
           </span>
         </div>
       ))}
+    </div>
+  );
+}
+
+function ChooseQuantity({
+  quantity,
+  item,
+  selectedExtras,
+  selectedSize,
+}: {
+  quantity: number;
+  selectedExtras: Extra[];
+  selectedSize: Size;
+  item: ProductWithRelations;
+}) {
+  const dispatch = useAppDispatch();
+  const totalPrice = item.basePrise + selectedSize.price + selectedExtras.reduce((sum, extra) => sum + extra.price, 0);
+
+  return (
+    <div className="flex items-center flex-col gap-2 mt-4 w-full">
+      <div className="flex items-center justify-center gap-2">
+        <Button
+          variant="outline"
+          onClick={() => dispatch(removeCartItem({ id: item.id }))}
+        >
+          -
+        </Button>
+        <div>
+          <span className="text-black">{quantity} in cart</span>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() =>
+            dispatch(
+              addCartItem({
+                basePrice: item.basePrise,
+                id: item.id,
+                image: item.image,
+                name: item.name,
+                extras: selectedExtras,
+                size: selectedSize,
+              })
+            )
+          }
+        >
+          +
+        </Button>
+      </div>
+      <div className="text-lg font-bold text-gray-800">
+        Total: {formatCurrency(totalPrice * quantity)}
+      </div>
+      <Button
+        size="sm"
+        onClick={() => dispatch(removeItemFromCart({ id: item.id }))}
+      >
+        Remove
+      </Button>
     </div>
   );
 }
