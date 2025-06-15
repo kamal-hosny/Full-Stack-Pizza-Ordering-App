@@ -151,7 +151,7 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
 
         <DialogFooter className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 text-lg font-bold text-gray-800">
-            Total: {formatCurrency(totalPrice)}
+            Total:  {formatCurrency(totalPrice * quantity)}
           </div>
           <div className="flex gap-2">
             <DialogClose asChild>
@@ -198,29 +198,47 @@ function PickSize({
   selectedSize: Size;
   setSelectedSize: React.Dispatch<React.SetStateAction<Size>>;
 }) {
+  // Map size names to icons
+  const sizeIcons = {
+    SMALL: "🍕",
+    MEDIUM: "🍕🍕",
+    LARGE: "🍕🍕🍕",
+    // Add more sizes as needed
+  };
+
   return (
     <RadioGroup defaultValue={selectedSize.id} className="grid grid-cols-3 gap-3">
       {sizes.map((size: Size) => (
-        <div
+        <Label
+        htmlFor={size.id}
           key={size.id}
-          className="border rounded-lg p-3 transition-all hover:border-primary cursor-pointer"
+          className={`border-2 rounded-xl p-3 transition-all cursor-pointer flex flex-col items-center
+            ${selectedSize.id === size.id 
+              ? 'border-red-500 bg-red-50 shadow-md ring-2 ring-red-300 ring-opacity-50' 
+              : 'border-amber-200 hover:border-amber-400'}`}
+          onClick={() => setSelectedSize(size)}
         >
           <div className="flex flex-col items-center">
+            <div className="text-2xl mb-1">
+              {sizeIcons[size.name as keyof typeof sizeIcons] || "🍕"}
+            </div>
             <RadioGroupItem
               id={size.id}
-              className="h-5 w-5 text-primary"
+              className="h-5 w-5 text-red-600"
               value={size.id}
               checked={selectedSize.id === size.id}
-              onClick={() => setSelectedSize(size)}
             />
-            <Label htmlFor={size.id} className="mt-2 font-medium text-gray-800">
+            <div className="mt-1 font-bold text-gray-800">
               {size.name}
-            </Label>
-            <p className="text-primary font-semibold mt-1">
+            </div>
+            <p className="text-red-600 font-bold mt-1">
+              +{formatCurrency(size.price)}
+            </p>
+            <p className="text-gray-600 text-xs mt-1">
               {formatCurrency(size.price + item.basePrise)}
             </p>
           </div>
-        </div>
+        </Label>
       ))}
     </RadioGroup>
   );
@@ -235,40 +253,58 @@ function Extras({
   selectedExtras: Extra[];
   setSelectedExtras: React.Dispatch<React.SetStateAction<Extra[]>>;
 }) {
+  const extraIcons: Record<string, string> = {
+    cheese: "🧀",
+    pepperoni: "🍖",
+    mushrooms: "🍄",
+    olives: "🫒",
+    peppers: "🫑",
+    onions: "🧅",
+
+  };
+
   const handleExtra = (extra: Extra) => {
     if (selectedExtras.find((e) => e.id === extra.id)) {
-      const filteredSelectedExtras = selectedExtras.filter(
-        (item) => item.id !== extra.id
-      );
-      setSelectedExtras(filteredSelectedExtras);
+      setSelectedExtras(selectedExtras.filter(item => item.id !== extra.id));
     } else {
-      setSelectedExtras((prev) => [...prev, extra]);
+      setSelectedExtras([...selectedExtras, extra]);
     }
   };
 
   return (
-    <div className="space-y-2">
-      {extras.map((extra: Extra) => (
-        <div
-          key={extra.id}
-          className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <div className="flex items-center">
-            <Checkbox
-              id={extra.id}
-              onClick={() => handleExtra(extra)}
-              checked={Boolean(selectedExtras.find((e) => e.id === extra.id))}
-              className="mr-3 h-5 w-5"
-            />
-            <Label htmlFor={extra.id} className="font-medium text-gray-800">
-              {extra.name}
-            </Label>
-          </div>
-          <span className="text-primary font-medium">
-            {formatCurrency(extra.price)}
-          </span>
-        </div>
-      ))}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {extras.map((extra: Extra) => {
+        const extraKey = extra.name.toLowerCase();
+        const icon = Object.keys(extraIcons).find(key => extraKey.includes(key)) 
+          ? extraIcons[Object.keys(extraIcons).find(key => extraKey.includes(key))!]
+          : "✨";
+
+        return (
+          <Label htmlFor={extra.id}
+            key={extra.id}
+            className={`flex items-center justify-between p-3 border-2 rounded-xl transition-colors
+              ${selectedExtras.find(e => e.id === extra.id) 
+                ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-300 ring-opacity-50' 
+                : 'border-amber-100 hover:border-amber-300'}`}
+          >
+            <div className="flex items-center">
+              <Checkbox
+                id={extra.id}
+                onClick={() => handleExtra(extra)}
+                checked={Boolean(selectedExtras.find((e) => e.id === extra.id))}
+                className="mr-3 h-5 w-5 text-amber-600"
+              />
+              <div className="font-medium text-gray-800 flex items-center">
+                <span className="mr-2 text-lg">{icon}</span>
+                {extra.name}
+              </div>
+            </div>
+            <span className="text-amber-600 font-bold">
+              +{formatCurrency(extra.price)}
+            </span>
+          </Label>
+        );
+      })}
     </div>
   );
 }
@@ -285,46 +321,68 @@ function ChooseQuantity({
   item: ProductWithRelations;
 }) {
   const dispatch = useAppDispatch();
-  const totalPrice = item.basePrise + selectedSize.price + selectedExtras.reduce((sum, extra) => sum + extra.price, 0);
+  const totalPrice = item.basePrise + selectedSize.price + 
+                    selectedExtras.reduce((sum, extra) => sum + extra.price, 0);
 
   return (
-    <div className="flex items-center flex-col gap-2 mt-4 w-full">
-      <div className="flex items-center justify-center gap-2">
-        <Button
-          variant="outline"
-          onClick={() => dispatch(removeCartItem({ id: item.id }))}
-        >
-          -
-        </Button>
-        <div>
-          <span className="text-black">{quantity} in cart</span>
+    <div className="flex flex-col gap-3 w-full">
+      <div className="flex items-center justify-between bg-gradient-to-r from-amber-50 to-red-50 p-3 rounded-xl border-2 border-amber-200 shadow-sm">
+        <div className="flex items-center">
+          <div className="bg-amber-500 text-white text-sm font-bold w-8 h-8 rounded-full flex items-center justify-center mr-3">
+            {quantity}
+          </div>
+          <div>
+            <div className="text-sm text-gray-600">In your cart</div>
+            <div className="font-bold text-red-700">
+              {formatCurrency(totalPrice * quantity)}
+            </div>
+          </div>
         </div>
-        <Button
-          variant="outline"
-          onClick={() =>
-            dispatch(
-              addCartItem({
-                basePrice: item.basePrise,
-                id: item.id,
-                image: item.image,
-                name: item.name,
-                extras: selectedExtras,
-                size: selectedSize,
-              })
-            )
-          }
-        >
-          +
-        </Button>
+        
+        <div className="flex items-center gap-1 bg-white p-1 rounded-full shadow-inner">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-red-600 hover:bg-red-50 w-8 h-8 rounded-full"
+            onClick={() => dispatch(removeCartItem({ id: item.id }))}
+          >
+            <span className="text-lg">-</span>
+          </Button>
+          
+          <div className="w-px h-6 bg-amber-200 mx-1"></div>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-green-600 hover:bg-green-50 w-8 h-8 rounded-full"
+            onClick={() =>
+              dispatch(
+                addCartItem({
+                  basePrice: item.basePrise,
+                  id: item.id,
+                  image: item.image,
+                  name: item.name,
+                  extras: selectedExtras,
+                  size: selectedSize,
+                })
+              )
+            }
+          >
+            <span className="text-lg">+</span>
+          </Button>
+        </div>
       </div>
-      <div className="text-lg font-bold text-gray-800">
-        Total: {formatCurrency(totalPrice * quantity)}
-      </div>
+      
       <Button
-        size="sm"
+        className="bg-gradient-to-r from-amber-50 to-amber-100 border-2 border-amber-200 text-red-600 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 font-bold py-3 transition-all group flex items-center justify-center"
         onClick={() => dispatch(removeItemFromCart({ id: item.id }))}
       >
-        Remove
+        <span className="flex items-center">
+          Remove Pizza 
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 group-hover:scale-110 transition-transform">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </span>
       </Button>
     </div>
   );

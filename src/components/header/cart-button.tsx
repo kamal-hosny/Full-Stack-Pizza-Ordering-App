@@ -10,13 +10,17 @@ import Link from "next/link";
 const CartButton = () => {
   const cart = useAppSelector(selectCartItems);
   const cartQuantity = getCartQuantity(cart);
+  
   return (
-    <Link href={`/${Routes.CART}`} className="block relative group">
-      <span className="absolute -top-4 start-4 w-5 h-5 text-sm bg-primary rounded-full text-white text-center">
+    <Link 
+      href={`/${Routes.CART}`} 
+      className="block relative group p-2 rounded-full hover:bg-gray-100 transition-colors"
+    >
+      <span className="absolute top-0 right-0 w-5 h-5 text-xs bg-red-500 rounded-full text-white flex items-center justify-center font-bold shadow-md">
         {cartQuantity}
       </span>
       <ShoppingCartIcon
-        className={`text-accent group-hover:text-primary duration-200 transition-colors !w-6 !h-6`}
+        className={`text-primary group-hover:text-primary-dark duration-200 transition-colors w-6 h-6`}
       />
     </Link>
   );

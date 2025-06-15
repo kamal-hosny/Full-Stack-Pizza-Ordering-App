@@ -1,15 +1,19 @@
+// Menu.tsx
 import MenuItem from "./MenuItem";
 import { ProductWithRelations } from "@/types/product";
 
 const Menu = ({ items }: { items: ProductWithRelations[] }) => {
   return items.length > 0 ? (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
       {items.map((item: ProductWithRelations) => (
         <MenuItem key={item.id} item={item} />
       ))}
     </div>
   ) : (
-    <p className="text-accent text-center">No products found</p>
+    <div className="bg-yellow-50 rounded-xl p-8 text-center border-2 border-dashed border-yellow-200">
+      <p className="text-xl font-bold text-yellow-700">No pizzas found!</p>
+      <p className="text-yellow-600 mt-2">Try another category</p>
+    </div>
   )
 };
 

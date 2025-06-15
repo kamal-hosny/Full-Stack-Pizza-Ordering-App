@@ -6,8 +6,6 @@ import { removeItemFromCart, selectCartItems } from "@/redux/features/cart/cartS
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useEffect } from "react";
-
 const CartItems = () => {
   const cart = useAppSelector(selectCartItems);
   const dispatch = useAppDispatch();
