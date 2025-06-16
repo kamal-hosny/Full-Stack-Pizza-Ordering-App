@@ -1,4 +1,4 @@
-import { Environments } from "@/constants/enums";
+import { Environments, Pages, Routes } from "@/constants/enums";
 import { type NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -33,5 +33,8 @@ debug: process.env.NODE_ENV === Environments.DEV,
       },
     }),
   ],
-  adapter: PrismaAdapter(db)
+  adapter: PrismaAdapter(db),
+  pages: {
+    signIn: `/${Routes.AUTH}/${Pages.LOGIN}`,
+  }
 };
