@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import ReduxProvider from "./providers/ReduxProvider";
 import { Directions, Languages } from "@/constants/enums";
 import { Locale } from "@/i18n.config";
+import { Toaster } from "@/components/ui/toaster";
 
 export async function generateStaticParams() {
   return[{
@@ -53,6 +54,7 @@ export default async function RootLayout({
         <Header />
         {children}
         <Footer />
+        <Toaster />
         </ReduxProvider>
         
       </body>
