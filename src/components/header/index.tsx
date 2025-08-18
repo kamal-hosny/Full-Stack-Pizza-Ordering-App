@@ -6,14 +6,18 @@ import CartButton from "./cart-button";
 import getTrans from "@/lib/translation";
 import { getCurrentLocale } from "@/lib/getCurrentLocale";
 import LanguageSwitcher from "./language-switcher";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auh";
+import AuthButtons from "./auth-buttons";
 
 const Header = async () => {
   const locale = await getCurrentLocale();
+  const initialSession = await getServerSession(authOptions);
   const translations = await getTrans(locale);
   
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md py-4 transition-all duration-300">
-      <div className="container flex items-center justify-between">
+      <div className="container flex items-center justify-between gap-6 lg:gap-10">
         {/* Logo with pizza icon */}
         <Link 
           href={Routes.ROOT} 
@@ -28,9 +32,15 @@ const Header = async () => {
         </Link>
 
         <div className="flex items-center gap-6">
-          <Navbar translations={translations} />
-          <div className="flex items-center gap-4">
-            <LanguageSwitcher />
+          <Navbar translations={translations} initialSession={initialSession} />
+          <div className="flex items-center gap-4 flex-1 justify-end">
+
+                <AuthButtons
+              translations={translations}
+              initialSession={initialSession}
+            />
+              <LanguageSwitcher />
+
             <CartButton />
           </div>
         </div>

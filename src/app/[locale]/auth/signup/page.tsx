@@ -21,9 +21,7 @@ const SignupPage = async ({
             <h2 className="text-2xl font-bold text-center mb-6">
                 {translations.auth.register.title}
             </h2>
-            <form action="">
             <Form translations={translations} />
-            </form>
             <p className="mt-2 flex items-center justify-center text-accent text-sm">
                 <span>{translations.auth.register.authPrompt.message}</span>
                 <Link

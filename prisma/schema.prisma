@@ -126,6 +126,7 @@ model User {
   postalCode    String?
   city          String?
   country       String?
+  role          UserRole       @default(USER)
   createAt      DateTime       @default(now())
   updateAt      DateTime       @updatedAt
   orders        OrderProduct[]

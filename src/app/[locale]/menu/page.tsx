@@ -1,10 +1,12 @@
 
 import Menu from "@/components/menu";
-import { db } from "@/lib/prisma";
+
 import { getProductsByCategory } from "@/server/db/products";
 
 const MenuPage = async () => {
   const categorites = await getProductsByCategory();
+
+  console.log(categorites)
   
   return (
     <main className="bg-gradient-to-b from-amber-50 to-white">

@@ -76,7 +76,7 @@ const Form = ({ translations }: { translations: Translations }) => {
       ))}
 
       <Button type="submit" disabled={isLoading} className="w-full">
-        {isLoading ? <Loader /> : "translations.auth.login.submit"}
+        {isLoading ? <Loader /> : translations.auth.login.submit}
       </Button>
     </form>
   );

@@ -144,10 +144,10 @@ const Hero = () => {
               {/* Main Pizza Image - FIXED */}
               <div className="absolute inset-0 flex items-center justify-center z-10">
                 <Image
-                  src="/assets/images/pizza.png" // Update with your image path
+                  src="https://img.freepik.com/premium-photo/isolated-pepperoni-pizza-with-salami_219193-8089.jpg" // Update with your image path
                   alt="Delicious Artisan Pizza"
                   fill
-                  className="object-contain"
+                  className="object-contain rounded-full"
                   priority
                   loading="eager"
                 />
