@@ -33,7 +33,7 @@ const MenuItem = ({ item }: { item: ProductWithRelations }) => {
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-xl text-red-800 font-serif">{item.name}</h3>
           <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold text-xl px-3 py-1 rounded-full shadow-md">
-            {formatCurrency(item.basePrise)}
+            {formatCurrency(item.basePrice)}
           </span>
         </div>
 

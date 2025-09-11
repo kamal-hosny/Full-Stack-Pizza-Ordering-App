@@ -8,115 +8,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// generator dbml {
-//   provider = "dbml-generator"
-//   output   = "./schema.dbml"
-// }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Product {
-  id          String         @id @default(cuid())
-  name        String
-  description String
-  image       String
-  order       Int
-  basePrise   Float
-  createAt    DateTime       @default(now())
-  updateAt    DateTime       @updatedAt
-  orders      OrderProduct[]
-  Size        Size[]
-  extras      Extra[]
-  Category    Category?      @relation(fields: [categoryId], references: [id])
-  categoryId  String?
-}
-
-model Size {
-  id        String      @id @default(cuid())
-  name      ProductSize
-  price     Float
-  Product   Product     @relation(fields: [ProductId], references: [id])
-  ProductId String
-}
-
-model Extra {
-  id        String          @id @default(cuid())
-  name      ExtraIngredient
-  price     Float
-  Product   Product         @relation(fields: [ProductId], references: [id])
-  ProductId String
-}
-
-model Category {
-  id      String    @id @default(cuid())
-  name    String
-  order   Int       @default(autoincrement())
-  Product Product[]
-}
-
-model Order {
-  id            String         @id @default(uuid())
-  paid          Boolean        @default(false)
-  subTotal      Float
-  deliveryFee   Float
-  totalPrice    Float
-  userEmail     String
-  phone         String
-  streetAddress String
-  postalCode    String
-  city          String
-  country       String
-  createAt      DateTime       @default(now())
-  updateAt      DateTime       @updatedAt
-  product       OrderProduct[]
-}
-
-model OrderProduct {
-  id       String @id @default(uuid())
-  quantity Int
-
-  order     Order   @relation(fields: [orderId], references: [id])
-  orderId   String
-  user      User?   @relation(fields: [userId], references: [id])
-  userId    String?
-  Product   Product @relation(fields: [productId], references: [id])
-  productId String
-}
-
-enum ProductSize {
-  SMALL
-  MEDIUM
-  LARGE
-}
-
-enum ExtraIngredient {
-  CHEESE
-  TOMATO
-  ONION
-  PEPPER
-  MUSHROOM
-  OLIVE
-  GARLIC
-  BASIL
-  SPINACH
-  CHICKEN
-  BEEF
-  SAUSAGE
-  PEPPERONI
-  HAM
-  PINEAPPLE
-}
-
-enum UserRole {
-  USER
-  ADMIN
-}
-
 model User {
-  id            String         @id @default(cuid())
+  id            String         @id @default(uuid())
   email         String         @unique
   password      String
   name          String
@@ -127,8 +25,8 @@ model User {
   city          String?
   country       String?
   role          UserRole       @default(USER)
-  createAt      DateTime       @default(now())
-  updateAt      DateTime       @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   orders        OrderProduct[]
   accounts      Account[]
   sessions      Session[]
@@ -144,23 +42,6 @@ model Session {
   @@index([userId])
 }
 
-model Account {
-  id                 String    @id @default(cuid())
-  userId             String
-  providerType       String
-  providerId         String
-  providerAccountId  String
-  refreshToken       String?
-  accessToken        String?
-  accessTokenExpires DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  user               User      @relation(fields: [userId], references: [id])
-
-  @@unique([providerId, providerAccountId])
-}
-
-
 model VerificationRequest {
   id         String   @id @default(cuid())
   identifier String
@@ -170,4 +51,110 @@ model VerificationRequest {
   updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Product {
+  id          String         @id @default(cuid())
+  name        String
+  description String
+  image       String
+  order       Int            @default(autoincrement())
+  basePrice   Float
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  sizes       Size[]
+  extras      Extra[]
+  orders      OrderProduct[]
+  category    Category       @relation(fields: [categoryId], references: [id])
+  categoryId  String
+}
+
+model Size {
+  id        String       @id @default(cuid())
+  name      ProductSizes
+  price     Float
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+}
+
+model Extra {
+  id        String           @id @default(cuid())
+  name      ExtraIngredients
+  price     Float
+  product   Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  order    Int       @default(autoincrement())
+  products Product[]
+}
+
+model Order {
+  id            String         @id @default(uuid())
+  paid          Boolean        @default(false)
+  subTotal      Float
+  deliveryFee   Float
+  totalPrice    Float
+  userEmail     String
+  phone         String
+  streetAddress String
+  postalCode    String
+  city          String
+  country       String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  products      OrderProduct[]
+}
+
+model OrderProduct {
+  id       String @id @default(cuid())
+  quantity Int
+
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+  user      User?   @relation(fields: [userId], references: [id])
+  userId    String?
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+}
+
+enum ProductSizes {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+enum ExtraIngredients {
+  CHEESE
+  BACON
+  TOMATO
+  ONION
+  PEPPER
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }

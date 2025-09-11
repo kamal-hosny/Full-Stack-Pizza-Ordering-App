@@ -7,7 +7,7 @@ import getTrans from "@/lib/translation";
 import { getCurrentLocale } from "@/lib/getCurrentLocale";
 import LanguageSwitcher from "./language-switcher";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/server/auh";
+import { authOptions } from "@/server/auth";
 import AuthButtons from "./auth-buttons";
 
 const Header = async () => {

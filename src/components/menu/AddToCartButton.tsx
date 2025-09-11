@@ -15,7 +15,7 @@ import { Label } from "@radix-ui/react-label";
 import Image from "next/image";
 import { formatCurrency } from "@/lib/formatters";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Extra, ProductSize, Size } from "@prisma/client";
+import { Extra, ProductSizes, Size } from "@prisma/client";
 import { ProductWithRelations } from "@/types/product";
 import {
   addCartItem,
@@ -34,8 +34,8 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
 
   const defaultSize =
     cart.find((element) => element.id === item.id)?.size ||
-    item.Size.find((size) => size.name === ProductSize.SMALL) ||
-    item.Size[0];
+    item.sizes.find((size) => size.name === ProductSizes.SMALL) ||
+    item.sizes[0];
 
   const defaultExtras =
     cart.find((element) => element.id === item.id)?.extras || [];
@@ -43,7 +43,7 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
   const [selectedSize, setSelectedSize] = useState<Size>(defaultSize!);
   const [selectedExtras, setSelectedExtras] = useState<Extra[]>(defaultExtras);
 
-  let totalPrice = item.basePrise;
+  let totalPrice = item.basePrice;
   if (selectedSize) {
     totalPrice += selectedSize.price;
   }
@@ -56,7 +56,7 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
   const handleAddToCart = () => {
     dispatch(
       addCartItem({
-        basePrice: item.basePrise,
+        basePrice: item.basePrice,
         id: item.id,
         image: item.image,
         name: item.name,
@@ -114,7 +114,7 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
               Select Size
             </h3>
             <PickSize
-              sizes={item.Size}
+              sizes={item.sizes}
               item={item}
               selectedSize={selectedSize}
               setSelectedSize={setSelectedSize}
@@ -235,7 +235,7 @@ function PickSize({
               +{formatCurrency(size.price)}
             </p>
             <p className="text-gray-600 text-xs mt-1">
-              {formatCurrency(size.price + item.basePrise)}
+              {formatCurrency(size.price + item.basePrice)}
             </p>
           </div>
         </Label>
@@ -321,7 +321,7 @@ function ChooseQuantity({
   item: ProductWithRelations;
 }) {
   const dispatch = useAppDispatch();
-  const totalPrice = item.basePrise + selectedSize.price + 
+  const totalPrice = item.basePrice + selectedSize.price + 
                     selectedExtras.reduce((sum, extra) => sum + extra.price, 0);
 
   return (
@@ -358,7 +358,7 @@ function ChooseQuantity({
             onClick={() =>
               dispatch(
                 addCartItem({
-                  basePrice: item.basePrise,
+                  basePrice: item.basePrice,
                   id: item.id,
                   image: item.image,
                   name: item.name,

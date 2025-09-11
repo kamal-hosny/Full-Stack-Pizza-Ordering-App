@@ -1,12 +1,13 @@
 
 import { Pages, Routes } from '@/constants/enums';
 import { Locale } from '@/i18n.config'
-import { authOptions } from '@/server/auh';
+import { authOptions } from '@/server/auth';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import React from 'react'
 import { UserRole } from '@prisma/client';
 import getTrans from "@/lib/translation";
+import EditUserForm from '@/components/edit-user-form';
 
 async function ProfilePage({ params }: { params: Promise<{ locale: Locale }> }) {
     const session = await getServerSession(authOptions)
@@ -26,8 +27,7 @@ async function ProfilePage({ params }: { params: Promise<{ locale: Locale }> }) 
                     <h1 className="text-primary text-center font-bold text-4xl italic mb-10">
                         {translations.profile.title}
                     </h1>
-
-
+                 <EditUserForm user={session?.user} translations={translations} />
 
                 </div>
             </section>

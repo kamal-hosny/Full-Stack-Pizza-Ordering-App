@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 
 export type ProductWithRelations = Prisma.ProductGetPayload<{
     include:{
-        Size: true;
+        sizes: true;
         extras: true;
     }
 }> 

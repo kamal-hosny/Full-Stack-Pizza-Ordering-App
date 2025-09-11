@@ -1,6 +1,5 @@
 import MainHeading from "@/components/main-heading";
 import Menu from "@/components/menu";
-import { db } from "@/lib/prisma";
 import { getBestSellers } from "@/server/db/products";
 const BestSellers = async () => {
   const bestSellers = await getBestSellers(3)

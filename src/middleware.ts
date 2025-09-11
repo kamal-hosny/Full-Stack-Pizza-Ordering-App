@@ -48,7 +48,7 @@ export default withAuth(
         new URL(`/${locale}${pathname}`, request.url)
       );
     }
-    const currentLocale = request.url.split("/")[3] as Locale;
+    const currentLocale = pathname.split("/")[1] as Locale;
     const isAuth = await getToken({ req: request });
     const isAuthPage = pathname.startsWith(`/${currentLocale}/${Routes.AUTH}`);
     const protectedRoutes = [Routes.PROFILE, Routes.ADMIN];

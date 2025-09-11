@@ -41,7 +41,7 @@ export const login = async (
         status: 401,
       };
     }
-    // لو كلمة السر صح، بيرجع بيانات المستخدم بدون الباسورد: 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
     return {
       user: userWithoutPassword,
@@ -66,7 +66,7 @@ export const signup = async (prevState: unknown, formData: FormData) => {
   if (result.success === false) {
     return {
       error: result.error.formErrors.fieldErrors,
-      formData
+      formData,
     };
   }
   try {

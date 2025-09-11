@@ -6,7 +6,6 @@ import { getProductsByCategory } from "@/server/db/products";
 const MenuPage = async () => {
   const categorites = await getProductsByCategory();
 
-  console.log(categorites)
   
   return (
     <main className="bg-gradient-to-b from-amber-50 to-white">
@@ -20,7 +19,7 @@ const MenuPage = async () => {
                 </h1>
                 <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-red-600 mx-auto rounded-full"></div>
               </div>
-              <Menu items={category.Product} />
+              <Menu items={category.products} />
             </div>
           </section>
         ))

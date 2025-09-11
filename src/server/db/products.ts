@@ -5,9 +5,9 @@ export const getProductsByCategory = cache(
   () => {
     const products = db.category.findMany({
       include:{
-        Product:{
+        products:{
           include:{
-            Size:true,
+            sizes:true,
             extras:true,
           }
         }
@@ -33,7 +33,7 @@ export const getBestSellers = cache(
         },
       },
       include: {
-        Size: true,
+        sizes: true,
         extras: true,
       },
       take: limit || 3, // Limit to top 3 best sellers
@@ -45,12 +45,30 @@ export const getBestSellers = cache(
 ); // Revalidate every `1` hour
 
 
+export const getProducts = cache(
+  () => {
+    const products = db.product.findMany({
+      include: {
+        sizes: true,
+        extras: true,
+        category: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return products;
+  },
+  ["products"],
+  { revalidate: 60 * 60 * 1 } // Revalidate every `1` hour
+);
+
 export const getProduct = cache(
   (id: string) => {
     const product = db.product.findUnique({
       where: { id },
       include: {
-        Size: true,
+        sizes: true,
         extras: true,
       },
     })

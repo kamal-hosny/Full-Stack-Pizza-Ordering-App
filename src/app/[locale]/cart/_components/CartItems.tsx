@@ -109,7 +109,7 @@ const CartItems = () => {
           </div>
           <h3 className="text-xl font-bold text-gray-700 mb-2">Your cart is empty</h3>
           <p className="text-gray-600 max-w-md">
-            Looks like you haven't added any items to your cart yet. Start shopping to fill your cart!
+            Looks like you haven&apos;t added any items to your cart yet. Start shopping to fill your cart!
           </p>
           <Button className="mt-6 bg-primary hover:bg-primary-dark">
             Start Shopping

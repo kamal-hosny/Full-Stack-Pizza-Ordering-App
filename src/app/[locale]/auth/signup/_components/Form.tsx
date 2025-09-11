@@ -17,12 +17,12 @@ const initialState: {
   message?: string;
   error?: ValidationErrors;
   status?: number | null;
-  FormData?: FormData | null;
+  formData?: FormData | null;
 } = {
   message: "",
-  error: {},
-  status: null,
-  FormData: null,
+  error: {} as ValidationErrors,
+  status: null as number | null,
+  formData: null as FormData | null,
 };
 
 function Form({ translations }: { translations: Translations }) {

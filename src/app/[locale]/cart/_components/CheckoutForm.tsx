@@ -15,7 +15,7 @@ const CheckoutForm = () => {
   const totalAmount = getTotalAmount(cart);
   const [isProcessing, setIsProcessing] = useState(false);
   
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsProcessing(true);
     // Simulate payment processing

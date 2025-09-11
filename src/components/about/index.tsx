@@ -31,7 +31,7 @@ async function About() {
           <div>
             <div className="bg-primary/10 p-6 rounded-xl mb-8">
               <p className="text-gray-700 italic">
-                "We believe pizza is not just food, it's an experience. Every slice tells a story of tradition, passion, and quality."
+                &ldquo;We believe pizza is not just food, it&apos;s an experience. Every slice tells a story of tradition, passion, and quality.&rdquo;
               </p>
             </div>
 
