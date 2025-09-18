@@ -5,24 +5,83 @@ import { Textarea } from "@/components/ui/textarea";
 import { getTotalAmount } from "@/lib/cart";
 import { formatCurrency } from "@/lib/formatters";
 import { selectCartItems } from "@/redux/features/cart/cartSlice";
-import { useAppSelector } from "@/redux/hooks";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { Label } from "@radix-ui/react-label";
 import { useState } from "react";
 import { FaLock, FaUser, FaHome, FaMapMarkerAlt, FaGlobe } from "react-icons/fa";
+import { createOrder } from "@/server/_actions/order";
+import { clearCart } from "@/redux/features/cart/cartSlice";
+import { orderSchema, OrderFormData } from "@/validations/order";
+import { useRouter } from "next/navigation";
 
 const CheckoutForm = () => {
   const cart = useAppSelector(selectCartItems);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
   const totalAmount = getTotalAmount(cart);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsProcessing(true);
-    // Simulate payment processing
-    setTimeout(() => {
+    setErrors({});
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      
+      // Prepare order data
+      const orderData: OrderFormData = {
+        userEmail: formData.get("email") as string,
+        phone: formData.get("phone") as string,
+        streetAddress: formData.get("address") as string,
+        postalCode: formData.get("postal-code") as string,
+        city: formData.get("city") as string,
+        country: formData.get("country") as string,
+        cartItems: cart.map(item => ({
+          productId: item.id,
+          quantity: item.quantity || 1,
+          sizeId: item.size?.id,
+          extrasIds: item.extras?.map(extra => extra.id),
+        })),
+        subTotal: totalAmount,
+        deliveryFee: 5.00, // Fixed delivery fee
+        totalPrice: totalAmount + 5.00,
+      };
+
+      // Validate the order data
+      const validationResult = orderSchema.safeParse(orderData);
+      
+      if (!validationResult.success) {
+        const fieldErrors: Record<string, string> = {};
+        validationResult.error.errors.forEach((error) => {
+          if (error.path[0]) {
+            fieldErrors[error.path[0] as string] = error.message;
+          }
+        });
+        setErrors(fieldErrors);
+        setIsProcessing(false);
+        return;
+      }
+
+      // Create the order
+      const result = await createOrder(orderData);
+
+      if (result.success) {
+        // Clear the cart
+        dispatch(clearCart());
+        
+        // Redirect to success page
+        router.push(`/order-success?orderId=${result.orderId}`);
+      } else {
+        alert(result.message || "Failed to create order. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating order:", error);
+      alert("An error occurred while creating your order. Please try again.");
+    } finally {
       setIsProcessing(false);
-      alert("Payment successful! Thank you for your purchase.");
-    }, 2000);
+    }
   };
 
   return (
@@ -48,18 +107,26 @@ const CheckoutForm = () => {
         <form onSubmit={handleSubmit}>
           <div className="grid gap-5">
             <div className="grid gap-2">
-              <Label htmlFor="name" className="text-gray-700 font-medium flex items-center gap-2">
-                <FaUser className="text-gray-500" />
-                Full Name
+              <Label htmlFor="email" className="text-gray-700 font-medium flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                Email Address
               </Label>
               <Input
-                id="name"
-                placeholder="John Doe"
-                type="text"
-                name="name"
-                className="py-3 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                id="email"
+                placeholder="john@example.com"
+                type="email"
+                name="email"
+                className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent ${
+                  errors.userEmail ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
+              {errors.userEmail && (
+                <p className="text-red-500 text-sm">{errors.userEmail}</p>
+              )}
             </div>
             
             <div className="grid gap-2">
@@ -74,9 +141,14 @@ const CheckoutForm = () => {
                 placeholder="+1 (555) 123-4567"
                 type="tel"
                 name="phone"
-                className="py-3 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent ${
+                  errors.phone ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
+              {errors.phone && (
+                <p className="text-red-500 text-sm">{errors.phone}</p>
+              )}
             </div>
             
             <div className="grid gap-2">
@@ -89,9 +161,14 @@ const CheckoutForm = () => {
                 placeholder="123 Main St, Apt 4B"
                 name="address"
                 rows={3}
-                className="py-3 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${
+                  errors.streetAddress ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
+              {errors.streetAddress && (
+                <p className="text-red-500 text-sm">{errors.streetAddress}</p>
+              )}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -105,9 +182,14 @@ const CheckoutForm = () => {
                   id="postal-code"
                   placeholder="12345"
                   name="postal-code"
-                  className="py-3 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    errors.postalCode ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   required
                 />
+                {errors.postalCode && (
+                  <p className="text-red-500 text-sm">{errors.postalCode}</p>
+                )}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="city" className="text-gray-700 font-medium flex items-center gap-2">
@@ -119,9 +201,14 @@ const CheckoutForm = () => {
                   id="city"
                   placeholder="New York"
                   name="city"
-                  className="py-3 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    errors.city ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   required
                 />
+                {errors.city && (
+                  <p className="text-red-500 text-sm">{errors.city}</p>
+                )}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="country" className="text-gray-700 font-medium flex items-center gap-2">
@@ -133,16 +220,31 @@ const CheckoutForm = () => {
                   id="country"
                   placeholder="United States"
                   name="country"
-                  className="py-3 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    errors.country ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   required
                 />
+                {errors.country && (
+                  <p className="text-red-500 text-sm">{errors.country}</p>
+                )}
               </div>
             </div>
             
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex justify-between items-center mb-6">
-                <span className="text-gray-700 font-bold">Total:</span>
-                <span className="text-2xl font-bold text-primary">{formatCurrency(totalAmount)}</span>
+              <div className="space-y-2 mb-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Subtotal:</span>
+                  <span className="text-gray-700">{formatCurrency(totalAmount)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Delivery Fee:</span>
+                  <span className="text-gray-700">{formatCurrency(5.00)}</span>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                  <span className="text-gray-700 font-bold text-lg">Total:</span>
+                  <span className="text-2xl font-bold text-primary">{formatCurrency(totalAmount + 5.00)}</span>
+                </div>
               </div>
               
               <Button 

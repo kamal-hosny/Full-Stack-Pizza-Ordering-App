@@ -1,12 +1,9 @@
 import { Environments, Pages, Routes } from "@/constants/enums";
 import { DefaultSession, type NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { db } from "@/lib/prisma";
 import { login } from "./_actions/auth";
 import { Locale } from "@/i18n.config";
 import { User, UserRole } from "@prisma/client";
-import { JWT } from "next-auth/jwt";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -15,13 +12,21 @@ declare module "next-auth" {
 }
 
 declare module "next-auth/jwt" {
-  interface JWT extends Partial<User> {
+  interface JWT {
     id: string;
     name: string;
     email: string;
     role: UserRole;
+    image?: string;
+    phone?: string;
+    streetAddress?: string;
+    postalCode?: string;
+    city?: string;
+    country?: string;
   }
 }
+
+
 
 export const authOptions: NextAuthOptions = {
   callbacks: {
@@ -30,7 +35,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id;
         session.user.name = token.name;
         session.user.email = token.email;
-        session.user.role = token.role;
+        session.user.role = token.role as UserRole;
         session.user.image = token.image as string;
         session.user.country = token.country as string;
         session.user.city = token.city as string;
@@ -40,27 +45,20 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    jwt: async ({ token }): Promise<JWT> => {
-      const dbUser = await db.user.findUnique({
-        where: {
-          email: token?.email,
-        },
-      });
-      if (!dbUser) {
-        return token;
+    jwt: async ({ token, user }) => {
+      if (user) {
+        token.id = user.id;
+        token.name = user.name || "";
+        token.email = user.email || "";
+        token.role = (user as User).role;
+        token.image = user.image || undefined;
+        token.country = (user as User).country || undefined;
+        token.city = (user as User).city || undefined;
+        token.postalCode = (user as User).postalCode || undefined;
+        token.streetAddress = (user as User).streetAddress || undefined;
+        token.phone = (user as User).phone || undefined;
       }
-      return {
-        id: dbUser.id,
-        name: dbUser.name,
-        email: dbUser.email,
-        role: dbUser.role,
-        image: dbUser.image,
-        city: dbUser.city,
-        country: dbUser.country,
-        phone: dbUser.phone,
-        postalCode: dbUser.postalCode,
-        streetAddress: dbUser.streetAddress,
-      };
+      return token;
     },
   },
   session: {
@@ -98,7 +96,6 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  adapter: PrismaAdapter(db),
   pages: {
     signIn: `/${Routes.AUTH}/${Pages.LOGIN}`,
   },

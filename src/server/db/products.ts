@@ -2,8 +2,8 @@ import { cache } from "@/lib/cache";
 import { db } from "@/lib/prisma";
 
 export const getProductsByCategory = cache(
-  () => {
-    const products = db.category.findMany({
+  async () => {
+    const products = await db.category.findMany({
       include:{
         products:{
           include:{
@@ -12,8 +12,8 @@ export const getProductsByCategory = cache(
           }
         }
       }
-    })
-    return products
+    });
+    return products;
   },
   ["products-by-category"],
   { revalidate: 60 * 60 * 1 } // Revalidate every `1` hour
@@ -63,17 +63,12 @@ export const getProducts = cache(
   { revalidate: 60 * 60 * 1 } // Revalidate every `1` hour
 );
 
-export const getProduct = cache(
-  (id: string) => {
-    const product = db.product.findUnique({
-      where: { id },
-      include: {
-        sizes: true,
-        extras: true,
-      },
-    })
-    return product;
-  },
-  [`product-${crypto.randomUUID()}`],
-  { revalidate: 60 * 60 * 1 } // Revalidate every `1` hour
-)
+export const getProduct = (id: string) => {
+  return db.product.findUnique({
+    where: { id },
+    include: {
+      sizes: true,
+      extras: true,
+    },
+  });
+}

@@ -31,10 +31,7 @@ export const addProduct = async (
   }
   const data = result.data;
   const basePrice = Number(data.basePrice);
-  const imageFile = data.image as File;
-  const imageUrl = Boolean(imageFile.size)
-    ? await getImageUrl(imageFile)
-    : undefined;
+  const imageUrl = data.image as string;
   try {
     if (imageUrl) {
       await db.product.create({
@@ -101,10 +98,7 @@ export const updateProduct = async (
   }
   const data = result.data;
   const basePrice = Number(data.basePrice);
-  const imageFile = data.image as File;
-  const imageUrl = Boolean(imageFile.size)
-    ? await getImageUrl(imageFile)
-    : undefined;
+  const imageUrl = data.image as string;
 
   const product = await db.product.findUnique({
     where: { id: args.productId },
@@ -124,7 +118,7 @@ export const updateProduct = async (
       data: {
         ...data,
         basePrice,
-        image: imageUrl ?? product.image,
+        image: imageUrl || product.image,
       },
     });
 
@@ -166,26 +160,6 @@ export const updateProduct = async (
       status: 500,
       message: translations.messages.unexpectedError,
     };
-  }
-};
-const getImageUrl = async (imageFile: File) => {
-  const formData = new FormData();
-  formData.append("file", imageFile);
-  formData.append("pathName", "product_images");
-
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/upload`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-    console.log(response);
-    const image = (await response.json()) as { url: string };
-    return image.url;
-  } catch (error) {
-    console.error("Error uploading file to Cloudinary:", error);
   }
 };
 

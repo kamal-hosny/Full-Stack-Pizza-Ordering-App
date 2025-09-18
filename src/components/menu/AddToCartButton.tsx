@@ -15,7 +15,8 @@ import { Label } from "@radix-ui/react-label";
 import Image from "next/image";
 import { formatCurrency } from "@/lib/formatters";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Extra, ProductSizes, Size } from "@prisma/client";
+import { Extra, Size } from "@prisma/client";
+import { ProductSizes } from "@prisma/client";
 import { ProductWithRelations } from "@/types/product";
 import {
   addCartItem,
@@ -32,6 +33,7 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
   const quantity = getItemQuantity(item.id, cart);
   const dispatch = useAppDispatch();
 
+
   const defaultSize =
     cart.find((element) => element.id === item.id)?.size ||
     item.sizes.find((size) => size.name === ProductSizes.SMALL) ||
@@ -40,7 +42,7 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
   const defaultExtras =
     cart.find((element) => element.id === item.id)?.extras || [];
 
-  const [selectedSize, setSelectedSize] = useState<Size>(defaultSize!);
+  const [selectedSize, setSelectedSize] = useState<Size | null>(defaultSize || null);
   const [selectedExtras, setSelectedExtras] = useState<Extra[]>(defaultExtras);
 
   let totalPrice = item.basePrice;
@@ -54,6 +56,11 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
   }
 
   const handleAddToCart = () => {
+    if (!selectedSize) {
+      // If no size is selected, we can't add to cart
+      return;
+    }
+    
     dispatch(
       addCartItem({
         basePrice: item.basePrice,
@@ -65,6 +72,18 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
       })
     );
   };
+
+  // If no sizes are available, show a disabled button with a message
+  if (item.sizes.length === 0) {
+    return (
+      <Button 
+        disabled 
+        className="bg-gray-400 text-white font-medium py-2 px-6 rounded-full shadow-md cursor-not-allowed"
+      >
+        No sizes available
+      </Button>
+    );
+  }
 
   return (
     <Dialog>
@@ -166,7 +185,8 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
               <Button
                 type="submit"
                 onClick={handleAddToCart}
-                className="bg-primary hover:bg-primary/90 px-8 py-2 font-medium text-white"
+                disabled={!selectedSize}
+                className="bg-primary hover:bg-primary/90 px-8 py-2 font-medium text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Add to cart {formatCurrency(totalPrice)}
               </Button>
@@ -195,8 +215,8 @@ function PickSize({
 }: {
   sizes: Size[];
   item: ProductWithRelations;
-  selectedSize: Size;
-  setSelectedSize: React.Dispatch<React.SetStateAction<Size>>;
+  selectedSize: Size | null;
+  setSelectedSize: React.Dispatch<React.SetStateAction<Size | null>>;
 }) {
   // Map size names to icons
   const sizeIcons = {
@@ -206,14 +226,26 @@ function PickSize({
     // Add more sizes as needed
   };
 
+  // If no sizes available, show a message
+  if (sizes.length === 0) {
+    return (
+      <div className="text-center py-4 text-gray-500">
+        No sizes available for this item
+      </div>
+    );
+  }
+
   return (
-    <RadioGroup defaultValue={selectedSize.id} className="grid grid-cols-3 gap-3">
+    <RadioGroup 
+      defaultValue={selectedSize?.id || sizes[0]?.id} 
+      className="grid grid-cols-3 gap-3"
+    >
       {sizes.map((size: Size) => (
         <Label
         htmlFor={size.id}
           key={size.id}
           className={`border-2 rounded-xl p-3 transition-all cursor-pointer flex flex-col items-center
-            ${selectedSize.id === size.id 
+            ${selectedSize?.id === size.id 
               ? 'border-red-500 bg-red-50 shadow-md ring-2 ring-red-300 ring-opacity-50' 
               : 'border-amber-200 hover:border-amber-400'}`}
           onClick={() => setSelectedSize(size)}
@@ -226,7 +258,7 @@ function PickSize({
               id={size.id}
               className="h-5 w-5 text-red-600"
               value={size.id}
-              checked={selectedSize.id === size.id}
+              checked={selectedSize?.id === size.id}
             />
             <div className="mt-1 font-bold text-gray-800">
               {size.name}
@@ -317,11 +349,11 @@ function ChooseQuantity({
 }: {
   quantity: number;
   selectedExtras: Extra[];
-  selectedSize: Size;
+  selectedSize: Size | null;
   item: ProductWithRelations;
 }) {
   const dispatch = useAppDispatch();
-  const totalPrice = item.basePrice + selectedSize.price + 
+  const totalPrice = item.basePrice + (selectedSize?.price || 0) + 
                     selectedExtras.reduce((sum, extra) => sum + extra.price, 0);
 
   return (
@@ -355,18 +387,21 @@ function ChooseQuantity({
             variant="ghost"
             size="icon"
             className="text-green-600 hover:bg-green-50 w-8 h-8 rounded-full"
-            onClick={() =>
-              dispatch(
-                addCartItem({
-                  basePrice: item.basePrice,
-                  id: item.id,
-                  image: item.image,
-                  name: item.name,
-                  extras: selectedExtras,
-                  size: selectedSize,
-                })
-              )
-            }
+            disabled={!selectedSize}
+            onClick={() => {
+              if (selectedSize) {
+                dispatch(
+                  addCartItem({
+                    basePrice: item.basePrice,
+                    id: item.id,
+                    image: item.image,
+                    name: item.name,
+                    extras: selectedExtras,
+                    size: selectedSize,
+                  })
+                );
+              }
+            }}
           >
             <span className="text-lg">+</span>
           </Button>

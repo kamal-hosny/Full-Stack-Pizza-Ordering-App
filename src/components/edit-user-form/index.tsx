@@ -27,11 +27,13 @@ const EditUserForm = ({
 }) => {
     const session = useSession();
     const formData = new FormData();
-    Object.entries(user).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && key !== "image") {
-            formData.append(key, value.toString())
-        }
-    })
+    if (user) {
+        Object.entries(user).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && key !== "image") {
+                formData.append(key, value.toString())
+            }
+        })
+    }
 
     const initialState: {
         message?: string;
@@ -45,57 +47,142 @@ const EditUserForm = ({
         formData,
     }
 
-    const [selectedImage, setSelectedImage] = useState(user.image ?? "")
-    const [isAdmin, setIsAdmin] = useState(user.role === UserRole.ADMIN);
+    const [selectedImage, setSelectedImage] = useState(user?.image ?? "")
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [isAdmin, setIsAdmin] = useState(user?.role === UserRole.ADMIN);
 
-    const [state, , pending] = useActionState(
-        updateProfile.bind(null, isAdmin),
+    const [state, action, pending] = useActionState(
+        async (prevState: unknown, formData: FormData) => {
+            // Add the selected file to formData if it exists
+            if (selectedFile) {
+                formData.set("image", selectedFile);
+                console.log("File added to formData in action:", selectedFile.name, selectedFile.size);
+            } else {
+                console.log("No file selected in action");
+            }
+            return updateProfile(isAdmin, prevState, formData);
+        },
         initialState
     );
     const { getFormFields } = useFormFields({
         slug: Routes.PROFILE,
-        translations,
+        translations: translations || {},
     });
 
     useEffect(() => {
-        if (state.message && state.status && !pending) {
+        if (state?.message && state?.status && !pending) {
             toast({
                 title: state.message,
                 className: state.status === 200 ? "text-green-400" : "text-destructive",
             })
         }
-    }, [pending, state.message, state.status])
+    }, [pending, state?.message, state?.status])
 
     useEffect(() => {
-        setSelectedImage(user.image as string);
-    }, [user.image]);
+        console.log("User image changed:", user?.image);
+        if (user?.image && user.image.trim() !== "") {
+            setSelectedImage(user.image as string);
+            setSelectedFile(null); // Reset selected file when user data changes
+        } else {
+            setSelectedImage(""); // Clear image if no user image
+        }
+    }, [user?.image]);
+
+    // Add safety checks after hooks
+    if (!user) {
+        return <div>User not found</div>;
+    }
+    
+    if (!translations) {
+        return <div>Loading translations...</div>;
+    }
 
 
 
     return (
-        <form className='flex flex-col md:flex-row gap-10'>
+        <form action={action} className='flex flex-col md:flex-row gap-10'>
             <div className="group relative w-[200px] h-[200px] overflow-hidden rounded-full mx-auto">
-                {selectedImage && (
-                    <Image
-                        src={selectedImage}
-                        alt={user.name}
-                        width={200}
-                        height={200}
-                        className="rounded-full object-cover"
-                    />
+                {selectedImage && selectedImage.trim() !== "" ? (
+                    <>
+                        {console.log("Rendering image:", selectedImage)}
+                        <Image
+                            src={selectedImage}
+                            alt={user?.name || "Profile"}
+                            width={200}
+                            height={200}
+                            className="rounded-full object-cover w-full h-full"
+                            onError={() => {
+                                console.log("Image failed to load, clearing selectedImage");
+                                setSelectedImage("");
+                            }}
+                        />
+                        {/* Overlay for hover effect */}
+                        <div className="absolute top-0 left-0 w-full h-full bg-gray-50/40 group-hover:opacity-[1] opacity-0 transition-opacity duration-200">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                id="image-upload"
+                                onChange={(event) => {
+                                    const file = event.target.files && event.target.files[0];
+                                    console.log("File selected:", file);
+                                    if (file) {
+                                        console.log("File details:", {
+                                            name: file.name,
+                                            size: file.size,
+                                            type: file.type
+                                        });
+                                        setSelectedFile(file);
+                                        const url = URL.createObjectURL(file);
+                                        setSelectedImage(url);
+                                    }
+                                }}
+                                name="image"
+                            />
+                            <label
+                                htmlFor="image-upload"
+                                className="border rounded-full w-[200px] h-[200px] element-center cursor-pointer"
+                            >
+                                <CameraIcon className="!w-8 !h-8 text-accent" />
+                            </label>
+                        </div>
+                    </>
+                ) : (
+                    /* Default state when no image */
+                    <div className="w-full h-full bg-gray-100 rounded-full flex items-center justify-center">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            id="image-upload"
+                            onChange={(event) => {
+                                const file = event.target.files && event.target.files[0];
+                                console.log("File selected:", file);
+                                if (file) {
+                                    console.log("File details:", {
+                                        name: file.name,
+                                        size: file.size,
+                                        type: file.type
+                                    });
+                                    setSelectedFile(file);
+                                    const url = URL.createObjectURL(file);
+                                    setSelectedImage(url);
+                                }
+                            }}
+                            name="image"
+                        />
+                        <label
+                            htmlFor="image-upload"
+                            className="border rounded-full w-[200px] h-[200px] element-center cursor-pointer"
+                        >
+                            <CameraIcon className="!w-8 !h-8 text-accent" />
+                        </label>
+                    </div>
                 )}
 
-                <div
-                    className={`${selectedImage
-                        ? "group-hover:opacity-[1] opacity-0 transition-opacity duration-200"
-                        : ""
-                        } absolute top-0 left-0 w-full h-full bg-gray-50/40`}
-                >
-                    <UploadImage setSelectedImage={setSelectedImage} />
-                </div>
             </div>
                      <div className="flex-1">
-                    {getFormFields().map((field: IFormField) => {
+                    {getFormFields()?.map((field: IFormField) => {
                         const fieldValue =
                             state?.formData?.get(field.name) ?? formData.get(field.name);
                         return (
@@ -108,7 +195,7 @@ const EditUserForm = ({
                                 />
                             </div>
                         );
-                    })}
+                    }) || []}
                     {session.data?.user.role === UserRole.ADMIN && (
                         <div className="flex items-center gap-2 my-4">
                             <Checkbox
@@ -122,7 +209,7 @@ const EditUserForm = ({
                         </div>
                     )}
                     <Button type="submit" className="w-full">
-                        {pending ? <Loader /> : translations.save}
+                        {pending ? <Loader /> : translations?.save || "Save"}
                     </Button>
                 </div>
         </form>
@@ -130,37 +217,3 @@ const EditUserForm = ({
 }
 
 export default EditUserForm
-
-const UploadImage = ({
-    setSelectedImage,
-}: {
-    setSelectedImage: React.Dispatch<React.SetStateAction<string>>;
-}) => {
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files && event.target.files[0];
-        if (file) {
-            const url = URL.createObjectURL(file);
-            setSelectedImage(url);
-        }
-    };
-
-    return (
-        <>
-            <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id="image-upload"
-                onChange={handleImageChange}
-                name="image"
-            />
-            <label
-                htmlFor="image-upload"
-                className="border rounded-full w-[200px] h-[200px] element-center cursor-pointer"
-            >
-                <CameraIcon className="!w-8 !h-8 text-accent" />
-
-            </label>
-        </>
-    )
-}

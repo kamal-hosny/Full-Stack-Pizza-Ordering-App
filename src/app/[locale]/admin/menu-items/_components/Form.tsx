@@ -105,6 +105,8 @@ function Form({
             {state.error?.image}
           </p>
         )}
+        {/* Hidden input to send the image URL */}
+        <input type="hidden" name="image" value={selectedImage} />
       </div>
 
       <div className="flex-1">
@@ -156,13 +158,43 @@ const UploadImage = ({
   selectedImage: string;
   setSelectedImage: React.Dispatch<React.SetStateAction<string>>;
 }) => {
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploading, setUploading] = useState(false);
+  
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      setSelectedImage(url);
+      setUploading(true);
+      try {
+        // Create preview URL
+        const url = URL.createObjectURL(file);
+        setSelectedImage(url);
+        
+        // Upload to Cloudinary
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("pathName", "product_images");
+        
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          setSelectedImage(result.url);
+        } else {
+          console.error("Upload failed");
+          setSelectedImage("");
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        setSelectedImage("");
+      } finally {
+        setUploading(false);
+      }
     }
   };
+  
   return (
     <div className="group mx-auto md:mx-0 relative w-[200px] h-[200px] overflow-hidden rounded-full">
       {selectedImage && (
@@ -187,13 +219,19 @@ const UploadImage = ({
           className="hidden"
           id="image-upload"
           onChange={handleImageChange}
-          name="image"
+          disabled={uploading}
         />
         <label
           htmlFor="image-upload"
-          className="border rounded-full w-[200px] h-[200px] element-center cursor-pointer"
+          className={`border rounded-full w-[200px] h-[200px] element-center cursor-pointer ${
+            uploading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
-          <CameraIcon className="!w-8 !h-8 text-accent" />
+          {uploading ? (
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+          ) : (
+            <CameraIcon className="!w-8 !h-8 text-accent" />
+          )}
         </label>
       </div>
     </div>

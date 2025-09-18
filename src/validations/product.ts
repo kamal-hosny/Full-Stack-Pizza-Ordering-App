@@ -3,23 +3,11 @@ import { z } from "zod";
 
 const imageValidation = (translations: Translations, isRequired: boolean) => {
   return !isRequired
-    ? z.custom((val) => val instanceof File)
-    : z.custom(
-        (val) => {
-          if (typeof val !== "object" || !val) {
-            return false;
-          }
-          if (!(val instanceof File)) {
-            return false;
-          }
-          const validMimeTypes = ["image/jpeg", "image/png", "image/gif"];
-          return validMimeTypes.includes(val.type);
-        },
-        {
-          message:
-            translations.admin["menu-items"].form.image.validation.required,
-        }
-      );
+    ? z.string().url().optional()
+    : z.string().url({
+        message:
+          translations.admin["menu-items"].form.image.validation.required,
+      });
 };
 const getCommonValidations = (translations: Translations) => {
   return {
