@@ -8,19 +8,32 @@ import { selectCartItems } from "@/redux/features/cart/cartSlice";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { Label } from "@radix-ui/react-label";
 import { useState } from "react";
-import { FaLock, FaUser, FaHome, FaMapMarkerAlt, FaGlobe } from "react-icons/fa";
+import { FaLock, FaHome, FaMapMarkerAlt, FaGlobe, FaCreditCard, FaMoneyBillWave } from "react-icons/fa";
 import { createOrder } from "@/server/_actions/order";
 import { clearCart } from "@/redux/features/cart/cartSlice";
-import { orderSchema, OrderFormData } from "@/validations/order";
+import { orderSchema, OrderFormData, PaymentMethod } from "@/validations/order";
 import { useRouter } from "next/navigation";
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import StripePaymentForm from './StripePaymentForm';
+import { useToast } from "@/hooks/use-toast";
+
+// Initialize Stripe
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 
+  "pk_test_51S9Ia6KsxJcoCyADTDwbOoqNklhoeh0fQO0VB9xI3FHK0HycMJCNnJbzMrqPPbqTw71ROXuazqkutsC9b0BVGeWE00TsA61Xyw"
+);
 
 const CheckoutForm = () => {
   const cart = useAppSelector(selectCartItems);
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { toast } = useToast();
   const totalAmount = getTotalAmount(cart);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH_ON_DELIVERY");
+  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,6 +51,8 @@ const CheckoutForm = () => {
         postalCode: formData.get("postal-code") as string,
         city: formData.get("city") as string,
         country: formData.get("country") as string,
+        notes: formData.get("notes") as string,
+        paymentMethod: paymentMethod,
         cartItems: cart.map(item => ({
           productId: item.id,
           quantity: item.quantity || 1,
@@ -68,20 +83,55 @@ const CheckoutForm = () => {
       const result = await createOrder(orderData);
 
       if (result.success) {
-        // Clear the cart
-        dispatch(clearCart());
+        toast({
+          title: "تم إنشاء الطلب بنجاح!",
+          description: "تم إنشاء طلبك وسيتم معالجته قريباً",
+        });
         
-        // Redirect to success page
-        router.push(`/order-success?orderId=${result.orderId}`);
+        if (paymentMethod === "CASH_ON_DELIVERY") {
+          // For cash on delivery, complete the order immediately
+          dispatch(clearCart());
+          router.push(`/order-success?orderId=${result.orderId}`);
+        } else {
+          // For Stripe payment, store order ID and show payment form
+          if (result.orderId) {
+            setCreatedOrderId(result.orderId);
+          }
+        }
       } else {
-        alert(result.message || "Failed to create order. Please try again.");
+        toast({
+          title: "فشل في إنشاء الطلب",
+          description: result.message || "حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error creating order:", error);
-      alert("An error occurred while creating your order. Please try again.");
+      toast({
+        title: "خطأ في النظام",
+        description: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى أو التواصل مع الدعم الفني.",
+        variant: "destructive",
+      });
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handlePaymentSuccess = () => {
+    toast({
+      title: "تم الدفع بنجاح!",
+      description: "تم دفع طلبك بنجاح وسيتم معالجته قريباً",
+    });
+    dispatch(clearCart());
+    router.push(`/order-success?orderId=${createdOrderId}`);
+  };
+
+  const handlePaymentError = (error: string) => {
+    toast({
+      title: "فشل في الدفع",
+      description: `فشل في معالجة الدفع: ${error}`,
+      variant: "destructive",
+    });
   };
 
   return (
@@ -231,6 +281,86 @@ const CheckoutForm = () => {
               </div>
             </div>
             
+            <div className="grid gap-2">
+              <Label htmlFor="notes" className="text-gray-700 font-medium">
+                ملاحظات إضافية (اختياري)
+              </Label>
+              <Textarea
+                id="notes"
+                placeholder="أي ملاحظات خاصة بالطلب..."
+                name="notes"
+                className="py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent border-gray-300"
+                rows={3}
+              />
+            </div>
+
+            {/* Payment Method Selection */}
+            <div className="grid gap-4">
+              <Label className="text-gray-700 font-medium text-lg">
+                طريقة الدفع
+              </Label>
+              
+              <div className="grid gap-3">
+                {/* Cash on Delivery Option */}
+                <div 
+                  className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 ${
+                    paymentMethod === "CASH_ON_DELIVERY" 
+                      ? "border-primary bg-primary/5" 
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setPaymentMethod("CASH_ON_DELIVERY")}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      paymentMethod === "CASH_ON_DELIVERY" 
+                        ? "border-primary bg-primary" 
+                        : "border-gray-300"
+                    }`}>
+                      {paymentMethod === "CASH_ON_DELIVERY" && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
+                    </div>
+                    <FaMoneyBillWave className="text-2xl text-green-600" />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-800">الدفع عند الاستلام</h3>
+                      <p className="text-sm text-gray-600">ادفع نقداً عند تسليم الطلب</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stripe Payment Option */}
+                <div 
+                  className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 ${
+                    paymentMethod === "STRIPE" 
+                      ? "border-primary bg-primary/5" 
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setPaymentMethod("STRIPE")}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      paymentMethod === "STRIPE" 
+                        ? "border-primary bg-primary" 
+                        : "border-gray-300"
+                    }`}>
+                      {paymentMethod === "STRIPE" && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
+                    </div>
+                    <FaCreditCard className="text-2xl text-blue-600" />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-800">الدفع الإلكتروني</h3>
+                      <p className="text-sm text-gray-600">ادفع بأمان عبر البطاقة الائتمانية</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <div className="w-8 h-5 bg-blue-600 rounded text-white text-xs flex items-center justify-center font-bold">V</div>
+                      <div className="w-8 h-5 bg-red-600 rounded text-white text-xs flex items-center justify-center font-bold">M</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="space-y-2 mb-6">
                 <div className="flex justify-between items-center">
@@ -247,22 +377,42 @@ const CheckoutForm = () => {
                 </div>
               </div>
               
-              <Button 
-                className="w-full py-6 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary rounded-xl text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-t-2 border-white border-solid rounded-full animate-spin"></div>
-                    Processing...
-                  </div>
-                ) : (
-                  <>
-                    <FaLock className="mr-2" />
-                    Pay Now
-                  </>
-                )}
-              </Button>
+              {createdOrderId && paymentMethod === "STRIPE" ? (
+                <Elements stripe={stripePromise}>
+                  <StripePaymentForm
+                    orderId={createdOrderId}
+                    totalAmount={totalAmount + 5.00}
+                    onPaymentSuccess={handlePaymentSuccess}
+                    onPaymentError={handlePaymentError}
+                  />
+                </Elements>
+              ) : (
+                <Button 
+                  className="w-full py-6 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary rounded-xl text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-t-2 border-white border-solid rounded-full animate-spin"></div>
+                      {paymentMethod === "STRIPE" ? "Creating Order..." : "Creating Order..."}
+                    </div>
+                  ) : (
+                    <>
+                      {paymentMethod === "STRIPE" ? (
+                        <>
+                          <FaCreditCard className="mr-2" />
+                          Create Order & Pay
+                        </>
+                      ) : (
+                        <>
+                          <FaMoneyBillWave className="mr-2" />
+                          Place Order (Cash on Delivery)
+                        </>
+                      )}
+                    </>
+                  )}
+                </Button>
+              )}
               
               <p className="text-center text-gray-500 text-sm mt-4">
                 By placing your order, you agree to our <a href="#" className="text-primary hover:underline">Terms of Service</a>

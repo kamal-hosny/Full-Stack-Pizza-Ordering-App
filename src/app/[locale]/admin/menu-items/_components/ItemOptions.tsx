@@ -190,13 +190,13 @@ const SelectName = ({
       defaultValue={item.name ? item.name : "select..."}
     >
       <SelectTrigger
-        className={` bg-white border-none mb-4 focus:ring-0 ${
+        className={`bg-white border-none mb-4 focus:ring-0 ${
           locale === Languages.ARABIC ? "flex-row-reverse" : "flex-row"
         }`}
       >
         <SelectValue>{item.name ? item.name : "select..."}</SelectValue>
       </SelectTrigger>
-      <SelectContent className="bg-transparent border-none z-50 bg-white">
+      <SelectContent className="bg-white border-none z-50">
         <SelectGroup className="bg-background text-accent z-50">
           {names.map((name, index) => (
             <SelectItem

@@ -108,6 +108,7 @@ model Category {
 model Order {
   id            String         @id @default(uuid())
   paid          Boolean        @default(false)
+  status        OrderStatus    @default(PENDING)
   subTotal      Float
   deliveryFee   Float
   totalPrice    Float
@@ -117,6 +118,10 @@ model Order {
   postalCode    String
   city          String
   country       String
+  notes         String?
+  paymentMethod PaymentMethod  @default(CASH_ON_DELIVERY)
+  paymentStatus PaymentStatus  @default(PENDING)
+  stripePaymentIntentId String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   products      OrderProduct[]
@@ -147,7 +152,29 @@ enum ExtraIngredients {
   PEPPER
 }
 
+
 enum UserRole {
   USER
   ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  STRIPE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
 }

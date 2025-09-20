@@ -30,26 +30,36 @@ async function MenuItemsPage({
   }
 
   return (
-    <main>
-      <section className="section-gap">
-        <div className="container">
-          <Link
-            href={`/${locale}/${Routes.ADMIN}/${Pages.MENU_ITEMS}/${Pages.NEW}`}
-            className={`${buttonVariants({
-              variant: "outline",
-            })} !mx-auto !flex !w-80 !h-10 mb-8`}
-          >
-            {translations.admin["menu-items"].createNewMenuItem}
-            <ArrowRightCircle
-              className={`!w-5 !h-5 ${
-                locale === Languages.ARABIC ? "rotate-180 " : ""
-              }`}
-            />
-          </Link>
-          <MenuItems products={products} />
+    <div className="p-6">
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">إدارة المنتجات</h1>
+            <p className="text-gray-600 mt-2">عرض وإدارة جميع منتجات القائمة</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-sm text-gray-500">إجمالي المنتجات</p>
+              <p className="text-2xl font-bold text-blue-600">{products.length}</p>
+            </div>
+            <Link
+              href={`/${locale}/${Routes.ADMIN}/${Pages.MENU_ITEMS}/${Pages.NEW}`}
+              className={`${buttonVariants({
+                variant: "default",
+              })} flex items-center gap-2 px-6 py-3`}
+            >
+              {translations.admin["menu-items"].createNewMenuItem}
+              <ArrowRightCircle
+                className={`w-5 h-5 ${
+                  locale === Languages.ARABIC ? "rotate-180" : ""
+                }`}
+              />
+            </Link>
+          </div>
         </div>
-      </section>
-    </main>
+      </div>
+      <MenuItems products={products} />
+    </div>
   );
 }
 

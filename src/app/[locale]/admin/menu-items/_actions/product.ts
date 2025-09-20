@@ -16,11 +16,21 @@ export const addProduct = async (
   prevState: unknown,
   formData: FormData
 ) => {
+  console.log("addProduct called with args:", args);
+  console.log("formData entries:", Object.fromEntries(formData.entries()));
+  
   const locale = await getCurrentLocale();
   const translations = await getTrans(locale);
-  const result = addProductSchema(translations).safeParse(
-    Object.fromEntries(formData.entries())
-  );
+  
+  const formDataObj = Object.fromEntries(formData.entries());
+  console.log("Form data object:", formDataObj);
+  
+  const result = addProductSchema(translations).safeParse(formDataObj);
+  
+  console.log("Validation result:", result);
+  if (!result.success) {
+    console.log("Validation errors:", result.error.formErrors.fieldErrors);
+  }
 
   if (result.success === false) {
     return {
@@ -32,6 +42,8 @@ export const addProduct = async (
   const data = result.data;
   const basePrice = Number(data.basePrice);
   const imageUrl = data.image as string;
+  const categoryId = data.categoryId || args.categoryId;
+  
   try {
     if (imageUrl) {
       await db.product.create({
@@ -39,7 +51,7 @@ export const addProduct = async (
           ...data,
           image: imageUrl,
           basePrice,
-          categoryId: args.categoryId,
+          categoryId: categoryId,
           sizes: {
             createMany: {
               data: args.options.sizes.map((size) => ({
@@ -66,7 +78,11 @@ export const addProduct = async (
         message: translations.messages.productAdded,
       };
     }
-    return {};
+    return {
+      error: { image: translations.admin["menu-items"].form.image.validation.required },
+      status: 400,
+      formData,
+    };
   } catch (error) {
     console.error(error);
     return {

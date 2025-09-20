@@ -21,6 +21,8 @@ const getCommonValidations = (translations: Translations) => {
     basePrice: z.string().min(1, {
       message:
         translations.admin["menu-items"].form.basePrice.validation.required,
+    }).refine((val) => !isNaN(Number(val)), {
+      message: "Base price must be a valid number",
     }),
     categoryId: z.string().min(1, {
       message:

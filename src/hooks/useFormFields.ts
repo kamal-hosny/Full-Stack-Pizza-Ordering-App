@@ -113,7 +113,7 @@ const useFormFields = ({ slug, translations }: Props) => {
     {
       label: translations.admin["menu-items"].form.basePrice.label,
       name: "basePrice",
-      type: "text",
+      type: "number",
       placeholder: translations.admin["menu-items"].form.basePrice.placeholder,
     },
   ];

@@ -1,16 +1,22 @@
-import { cache } from "@/lib/cache";
 import { db } from "@/lib/prisma";
 
-export const getUsers = cache(
-    () => {
-const users = db.user.findMany();
-return users
-    } , ["users"],
-    {revalidate: 3600}
-);
-export const getUser = (userId: string) =>
-  cache(
-    () => db.user.findUnique({ where: { id: userId } }),
-    [`user-${userId}`], 
-    { revalidate: 3600 }
-  )();
+export const getUsers = async () => {
+    try {
+        console.log('Fetching users from database...');
+        const users = await db.user.findMany();
+        console.log('Found users:', users.length);
+        return users;
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        return [];
+    }
+};
+export const getUser = async (userId: string) => {
+    try {
+        const user = await db.user.findUnique({ where: { id: userId } });
+        return user;
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        return null;
+    }
+};

@@ -20,7 +20,6 @@ import {
 import ItemOptions, { ItemOptionsKeys } from "./ItemOptions";
 import Link from "@/components/link";
 import { useParams } from "next/navigation";
-import { ValidationErrors } from "@/validations/auth";
 import { addProduct, deleteProduct, updateProduct } from "../_actions/product";
 import Loader from "@/components/ui/loader";
 import { toast } from "@/hooks/use-toast";
@@ -52,24 +51,14 @@ function Form({
     translations,
   });
 
-  const formData = new FormData();
+  // Remove the problematic formData initialization
+  // The form will use the actual form data from the submission
 
-  Object.entries(product ?? {}).forEach(([key, value]) => {
-    if (value !== null && value !== undefined && key !== "image") {
-      formData.append(key, value.toString());
-    }
-  });
-
-  const initialState: {
-    message?: string;
-    error?: ValidationErrors;
-    status?: number | null;
-    formData?: FormData | null;
-  } = {
+  const initialState = {
     message: "",
-    error: {},
-    status: null,
-    formData: null,
+    error: {} as Record<string, string[]>,
+    status: 0,
+    formData: null as FormData | null,
   };
 
   const [state, action, pending] = useActionState(
@@ -83,7 +72,17 @@ function Form({
   );
 
   useEffect(() => {
+    console.log("=== FORM DEBUG ===");
+    console.log("Form state:", state);
+    console.log("Form pending:", pending);
+    console.log("Selected image:", selectedImage);
+    console.log("Category ID:", categoryId);
+    console.log("Sizes:", sizes);
+    console.log("Extras:", extras);
+    console.log("==================");
+    
     if (state.message && state.status && !pending) {
+      console.log("Showing toast with message:", state.message);
       toast({
         title: state.message,
         className:
@@ -91,10 +90,19 @@ function Form({
             ? "text-green-400"
             : "text-destructive",
       });
+      
+      // Reset form after successful submission
+      if (state.status === 201) {
+        console.log("Resetting form after successful submission");
+        setSelectedImage("");
+        setCategoryId(categories[0]?.id || "");
+        setSizes([]);
+        setExtras([]);
+      }
     }
-  }, [pending, state.message, state.status]);
+  }, [pending, state.message, state.status, selectedImage, categoryId, sizes, extras, categories, state]);
   return (
-    <form action={action} className="flex flex-col md:flex-row gap-10">
+    <form key={state.status === 201 ? Date.now() : undefined} action={action} className="flex flex-col md:flex-row gap-10">
       <div>
         <UploadImage
           selectedImage={selectedImage}
@@ -107,18 +115,19 @@ function Form({
         )}
         {/* Hidden input to send the image URL */}
         <input type="hidden" name="image" value={selectedImage} />
+        {/* Hidden input to send the categoryId */}
+        <input type="hidden" name="categoryId" value={categoryId} />
       </div>
 
       <div className="flex-1">
         {getFormFields().map((field: IFormField) => {
-          const fieldValue =
-            state.formData?.get(field.name) ?? formData.get(field.name);
+          const fieldValue = state.formData?.get(field.name) ?? (product ? product[field.name as keyof ProductWithRelations] : "");
 
           return (
             <div key={field.name} className="mb-3">
               <FormFields
                 {...field}
-                error={state?.error}
+                error={state?.error || {} as Record<string, string[]>}
                 defaultValue={fieldValue as string}
               />
             </div>

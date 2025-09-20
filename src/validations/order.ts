@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+export const paymentMethodSchema = z.enum(["CASH_ON_DELIVERY", "STRIPE"], {
+  errorMap: () => ({ message: "Please select a payment method" }),
+});
+
 export const orderSchema = z.object({
   userEmail: z
     .string()
@@ -25,6 +29,8 @@ export const orderSchema = z.object({
     .string()
     .min(1, "Country is required")
     .min(2, "Country must be at least 2 characters"),
+  notes: z.string().optional(),
+  paymentMethod: paymentMethodSchema,
   cartItems: z
     .array(
       z.object({
@@ -41,3 +47,4 @@ export const orderSchema = z.object({
 });
 
 export type OrderFormData = z.infer<typeof orderSchema>;
+export type PaymentMethod = z.infer<typeof paymentMethodSchema>;

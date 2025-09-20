@@ -12,10 +12,12 @@ async function AdminLayout({
   const locale = (await params).locale;
   const translations = await getTrans(locale);
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <AdminTabs translations={translations} />
-      {children}
-    </>
+      <main className="relative">
+        {children}
+      </main>
+    </div>
   );
 }
 

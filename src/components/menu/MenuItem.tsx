@@ -12,13 +12,19 @@ const MenuItem = ({ item }: { item: ProductWithRelations }) => {
       <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-red-600"></div>
       
       <div className="relative h-60 overflow-hidden">
-        <Image
-          src={item.image}
-          alt={item.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
+        {item.image && item.image.trim() !== "" ? (
+          <Image
+            src={item.image}
+            alt={item.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+            <span className="text-gray-500 text-4xl">🍕</span>
+          </div>
+        )}
         
         {/* Popular tag as pizza slice */}
         <div className="absolute top-4 right-4 bg-white text-red-600 text-xs font-bold px-3 py-2 rounded-full shadow-lg rotate-6 flex items-center">
