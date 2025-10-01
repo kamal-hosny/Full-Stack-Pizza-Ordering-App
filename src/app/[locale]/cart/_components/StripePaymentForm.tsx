@@ -31,8 +31,8 @@ const StripePaymentForm = ({ orderId, totalAmount, onPaymentSuccess, onPaymentEr
 
     try {
       toast({
-        title: "جاري إنشاء نية الدفع...",
-        description: "يرجى الانتظار بينما نقوم بإنشاء نية الدفع",
+        title: trans?.checkout.stripeCreatingTitle || "Creating payment intent...",
+        description: trans?.checkout.stripeCreatingDescription || "Please wait while we create a payment intent",
       });
 
       // Create payment intent
@@ -44,15 +44,21 @@ const StripePaymentForm = ({ orderId, totalAmount, onPaymentSuccess, onPaymentEr
         body: JSON.stringify({ orderId }),
       });
 
-      const { clientSecret } = await response.json();
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: trans?.checkout.stripeCreateIntentFailed || 'Failed to create payment intent' }));
+        throw new Error(err.error || (trans?.checkout.stripeCreateIntentFailed || 'Failed to create payment intent'));
+      }
+
+      const data = await response.json();
+      const clientSecret = data?.clientSecret as string | undefined;
 
       if (!clientSecret) {
-        throw new Error('Failed to create payment intent');
+        throw new Error(trans?.checkout.stripeCreateIntentFailed || 'Failed to create payment intent');
       }
 
       toast({
-        title: "جاري معالجة الدفع...",
-        description: "يرجى الانتظار بينما نقوم بمعالجة الدفع",
+        title: trans?.checkout.stripeConfirmingTitle || "Processing payment...",
+        description: trans?.checkout.stripeConfirmingDescription || "Please wait while we confirm your payment",
       });
 
       // Confirm payment
@@ -63,13 +69,13 @@ const StripePaymentForm = ({ orderId, totalAmount, onPaymentSuccess, onPaymentEr
       });
 
       if (error) {
-        onPaymentError(error.message || 'Payment failed');
+        onPaymentError(error.message || (trans?.checkout.stripeGenericError || 'Payment failed'));
       } else if (paymentIntent.status === 'succeeded') {
         onPaymentSuccess();
       }
     } catch (error) {
       console.error('Payment error:', error);
-      onPaymentError('An error occurred during payment');
+      onPaymentError(error instanceof Error ? error.message : (trans?.checkout.stripeGenericError || 'An error occurred during payment'));
     } finally {
       setIsProcessing(false);
     }

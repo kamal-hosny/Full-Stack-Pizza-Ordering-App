@@ -506,7 +506,13 @@
       "tosNote": "By placing your order, you agree to our",
       "tos": "Terms of Service",
       "stripeProcessing": "Processing Payment...",
-      "stripePay": "Pay"
+      "stripePay": "Pay",
+      "stripeCreatingTitle": "Creating payment intent...",
+      "stripeCreatingDescription": "Please wait while we create a payment intent",
+      "stripeConfirmingTitle": "Processing payment...",
+      "stripeConfirmingDescription": "Please wait while we confirm your payment",
+      "stripeCreateIntentFailed": "Failed to create payment intent",
+      "stripeGenericError": "An error occurred during payment"
     }
   },
   "orderSuccess": {

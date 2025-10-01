@@ -39,7 +39,6 @@ export interface AdminDashboardProps {
   };
   recentOrders: RecentOrder[];
   translations: Translations;
-  [key: string]: any;
 }
 
 const statusColors = {
@@ -241,7 +240,7 @@ const AdminDashboard: FC<AdminDashboardProps> = ({ user, stats, recentOrders, tr
                     </div>
                     <div className="text-right">
                       <Badge className={statusColors[order.status as keyof typeof statusColors]}>
-                        {(translations.admin.dashboard.statusLabels as any)[order.status] ?? statusLabelsFallback[order.status as keyof typeof statusLabelsFallback]}
+                        {translations.admin.dashboard.statusLabels[order.status as keyof typeof statusLabelsFallback] ?? statusLabelsFallback[order.status as keyof typeof statusLabelsFallback]}
                       </Badge>
                       <p className="text-sm font-medium text-gray-900 mt-1">
                         {formatCurrency(order.totalPrice)}

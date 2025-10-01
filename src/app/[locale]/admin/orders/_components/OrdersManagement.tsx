@@ -160,6 +160,10 @@ export default function OrdersManagement({ orders, translations, locale }: Order
       setAllOrders(prev => prev.map(order => (
         order.id === orderId ? { ...order, status: newStatus } : order
       )));
+      // Also update the filtered list immediately so the Select reflects the change without delay
+      setFilteredOrders(prev => prev.map(order => (
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )));
     } catch (error) {
       console.error("Error updating order status:", error);
     }

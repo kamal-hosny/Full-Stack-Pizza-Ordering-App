@@ -506,7 +506,13 @@
       "tosNote": "بمتابعتك إتمام الطلب، فإنك توافق على",
       "tos": "شروط الخدمة",
       "stripeProcessing": "جارٍ معالجة الدفع...",
-      "stripePay": "ادفع"
+      "stripePay": "ادفع",
+      "stripeCreatingTitle": "جاري إنشاء نية الدفع...",
+      "stripeCreatingDescription": "يرجى الانتظار بينما نقوم بإنشاء نية الدفع",
+      "stripeConfirmingTitle": "جاري معالجة الدفع...",
+      "stripeConfirmingDescription": "يرجى الانتظار بينما نقوم بتأكيد الدفع",
+      "stripeCreateIntentFailed": "فشل إنشاء نية الدفع",
+      "stripeGenericError": "حدث خطأ أثناء الدفع"
     }
   },
 

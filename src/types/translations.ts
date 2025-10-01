@@ -287,6 +287,7 @@ export type Translations = {
   };
   sizes: string;
   extrasIngredients: string;
+  edit: string;
   delete: string;
   cancel: string;
   create: string;

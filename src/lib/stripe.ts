@@ -6,9 +6,7 @@ if (!stripeSecretKey) {
   throw new Error('STRIPE_SECRET_KEY is not set');
 }
 
-export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2025-08-27.basil',
-});
+export const stripe = new Stripe(stripeSecretKey, {});
 
 export const formatAmountForStripe = (amount: number): number => {
   // Convert dollars to cents

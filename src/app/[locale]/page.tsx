@@ -24,21 +24,7 @@ export default async function Home({ params }: { params: Promise<{ locale: Local
         title={t.home.bestSeller.OurBestSellers}
         menuTranslations={t.menuItem}
       />
-      <About 
-        subTitle={t.home.about.ourStory}
-        title={t.home.about.aboutUs}
-        descOne={t.home.about.descriptions.one}
-        descTwo={t.home.about.descriptions.two}
-        descThree={t.home.about.descriptions.three}
-        badgeCount={t.home.about.badge?.count || "10+"}
-        badgeLabel={t.home.about.badge?.years || "Years of Experience"}
-        meetOurChefs={t.home.about.buttons?.meetOurChefs || "Meet Our Chefs"}
-        viewOurMenu={t.home.about.buttons?.viewOurMenu || "View Our Menu"}
-        f1={t.home.about.features?.f1 || "Handmade Dough"}
-        f2={t.home.about.features?.f2 || "Fresh Ingredients"}
-        f3={t.home.about.features?.f3 || "Wood-Fired Oven"}
-        f4={t.home.about.features?.f4 || "Family Recipes"}
-      />
+      <About />
       <Contact 
         subTitle={t.home.contact["Don'tHesitate"]}
         title={t.home.contact.contactUs}
