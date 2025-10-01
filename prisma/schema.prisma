@@ -156,6 +156,7 @@ enum ExtraIngredients {
 enum UserRole {
   USER
   ADMIN
+  SUPER_ADMIN
 }
 
 enum OrderStatus {

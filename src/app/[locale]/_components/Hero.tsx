@@ -34,7 +34,7 @@ const floatAnimation = {
   }
 };
 
-const Hero = () => {
+const Hero = ({ title, description, orderNow, learnMore, featureDelivery, featureNatural }: { title: string; description: string; orderNow: string; learnMore: string; featureDelivery: string; featureNatural: string }) => {
   return (
     <section className="relative overflow-hidden py-16 md:py-24 bg-white">
       {/* Decorative elements */}
@@ -53,7 +53,7 @@ const Hero = () => {
         >
           <motion.div className="mb-6" variants={item}>
             <span className="bg-primary/10 text-primary px-4 py-1 rounded-full font-medium text-sm">
-              Freshly Baked Daily
+              {learnMore}
             </span>
           </motion.div>
           
@@ -61,16 +61,14 @@ const Hero = () => {
             className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-gray-900 mb-6"
             variants={item}
           >
-            <span className="text-primary block">Authentic</span>
-            Italian Pizza Experience
+            <span className="text-primary block">{title}</span>
           </motion.h1>
           
           <motion.p 
             className="text-gray-600 my-6 max-w-lg text-lg"
             variants={item}
           >
-            Handcrafted pizzas made with traditional recipes, premium ingredients, 
-            and baked to perfection in our wood-fired ovens.
+            {description}
           </motion.p>
           
           <motion.div 
@@ -84,7 +82,7 @@ const Hero = () => {
                   size: "lg",
                 })} space-x-2 !px-8 !py-5 !rounded-full font-bold shadow-md hover:shadow-lg transition-shadow duration-300 bg-primary hover:bg-primary-dark text-white flex items-center`}
               >
-                Order Now
+                {orderNow}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </motion.div>
@@ -97,7 +95,7 @@ const Hero = () => {
                   size: "lg",
                 })} space-x-2 !px-8 !py-5 !rounded-full font-bold border-2 border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-white transition-colors duration-300 flex items-center`}
               >
-                Our Story
+                {learnMore}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </motion.div>
@@ -114,7 +112,7 @@ const Hero = () => {
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <span className="text-primary font-bold">✓</span>
               </div>
-              <span className="font-medium">30 Min Delivery</span>
+              <span className="font-medium">{featureDelivery}</span>
             </motion.div>
             
             <motion.div 
@@ -124,7 +122,7 @@ const Hero = () => {
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <span className="text-primary font-bold">✓</span>
               </div>
-              <span className="font-medium">100% Natural Ingredients</span>
+              <span className="font-medium">{featureNatural}</span>
             </motion.div>
           </motion.div>
         </motion.div>

@@ -34,19 +34,19 @@ async function MenuItemsPage({
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">إدارة المنتجات</h1>
-            <p className="text-gray-600 mt-2">عرض وإدارة جميع منتجات القائمة</p>
+            <h1 className="text-3xl font-bold text-gray-900">{translations.admin["menu-items"].page.title}</h1>
+            <p className="text-gray-600 mt-2">{translations.admin["menu-items"].page.subtitle}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm text-gray-500">إجمالي المنتجات</p>
-              <p className="text-2xl font-bold text-blue-600">{products.length}</p>
+              <p className="text-sm text-gray-500">{translations.admin["menu-items"].page.totalProducts}</p>
+              <p className="text-2xl font-bold text-[#fe0019]">{products.length}</p>
             </div>
             <Link
               href={`/${locale}/${Routes.ADMIN}/${Pages.MENU_ITEMS}/${Pages.NEW}`}
               className={`${buttonVariants({
                 variant: "default",
-              })} flex items-center gap-2 px-6 py-3`}
+              })} flex items-center gap-2 px-6 py-3 bg-[#fe0019] hover:bg-[#df0016]`}
             >
               {translations.admin["menu-items"].createNewMenuItem}
               <ArrowRightCircle
@@ -58,7 +58,7 @@ async function MenuItemsPage({
           </div>
         </div>
       </div>
-      <MenuItems products={products} />
+      <MenuItems products={products} translations={translations} />
     </div>
   );
 }

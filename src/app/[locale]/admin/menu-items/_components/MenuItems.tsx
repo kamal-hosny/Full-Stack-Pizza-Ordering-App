@@ -5,8 +5,9 @@ import { Pages, Routes } from "@/constants/enums";
 import { Product } from "@prisma/client";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import { Translations } from "@/types/translations";
 
-function MenuItems({ products }: { products: Product[] }) {
+function MenuItems({ products, translations }: { products: Product[]; translations: Translations }) {
   const { locale } = useParams();
   
   return products && products.length > 0 ? (
@@ -26,13 +27,13 @@ function MenuItems({ products }: { products: Product[] }) {
               width={100}
               height={100}
             />
-            <h3 className="text-lg text-accent font-medium">{product.name}</h3>
+            <h3 className="text-lg text-[#fe0019] font-medium">{product.name}</h3>
           </Link>
         </li>
       ))}
     </ul>
   ) : (
-    <p className="text-accent text-center">No products found</p>
+    <p className="text-[#fe0019] text-center">{translations.noProductsFound}</p>
   );
 }
 

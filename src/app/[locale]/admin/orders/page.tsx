@@ -1,9 +1,11 @@
 import { getOrders } from "@/server/_actions/order";
-import { formatCurrency } from "@/lib/formatters";
-import { format } from "date-fns";
 import OrdersManagement from "./_components/OrdersManagement";
+import getTrans from "@/lib/translation";
+import { Locale } from "@/i18n.config";
 
-const OrdersPage = async () => {
+const OrdersPage = async ({ params }: { params: Promise<{ locale: Locale }> }) => {
+  const { locale } = await params;
+  const t = await getTrans(locale);
   const orders = await getOrders();
 
   return (
@@ -11,16 +13,16 @@ const OrdersPage = async () => {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">إدارة الطلبات</h1>
-            <p className="text-gray-600 mt-2">عرض وإدارة جميع طلبات العملاء</p>
+            <h1 className="text-3xl font-bold text-gray-900">{t.admin.tabs.orders}</h1>
+            <p className="text-gray-600 mt-2">{t.admin.dashboard.quickActions.manageOrdersDesc}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm text-gray-500">إجمالي الطلبات</p>
+              <p className="text-sm text-gray-500">{t.admin.dashboard.stats.totalOrders}</p>
               <p className="text-2xl font-bold text-blue-600">{orders.length}</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-500">الطلبات المعلقة</p>
+              <p className="text-sm text-gray-500">{t.admin.dashboard.stats.pendingOrders}</p>
               <p className="text-2xl font-bold text-yellow-600">
                 {orders.filter(order => order.status === 'PENDING').length}
               </p>
@@ -29,7 +31,7 @@ const OrdersPage = async () => {
         </div>
       </div>
 
-      <OrdersManagement orders={orders} />
+      <OrdersManagement orders={orders} translations={t} locale={locale} />
     </div>
   );
 };

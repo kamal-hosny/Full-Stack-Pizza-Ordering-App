@@ -2,7 +2,6 @@
 
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { OrderStatus, PaymentMethod, PaymentStatus } from "@prisma/client";
 
 export interface OrderData {
@@ -206,11 +205,11 @@ export async function getOrderById(orderId: string) {
   }
 }
 
-export async function updateOrderStatus(orderId: string, paid: boolean) {
+export async function updateOrderStatus(orderId: string, newStatus: OrderStatus) {
   try {
-    const order = await db.order.update({
+    await db.order.update({
       where: { id: orderId },
-      data: { paid },
+      data: { status: newStatus },
     });
 
     revalidatePath("/admin/orders");
@@ -234,7 +233,7 @@ export async function updatePaymentStatus(
   stripePaymentIntentId?: string
 ) {
   try {
-    const order = await db.order.update({
+    await db.order.update({
       where: { id: orderId },
       data: { 
         paymentStatus,

@@ -4,6 +4,9 @@ import { Locale } from "@/i18n.config";
 import getTrans from "@/lib/translation";
 import { getUser, getUsers } from "@/server/db/users";
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auth";
+import { requireUserEditAccess } from "@/lib/auth-guards";
 
 export async function generateStaticParams() {
     const users = await getUsers();
@@ -17,9 +20,15 @@ async function EditUserPage({ params }: {
     const { locale, userId } = await params;
     const translations = await getTrans(locale);
     const user = await getUser(userId);
+    
     if (!user) {
         redirect(`/${locale}/${Routes.ADMIN}/${Pages.USERS}`);
     }
+    
+    // التحقق من صلاحية تعديل المستخدم
+    const session = await getServerSession(authOptions);
+    const isOwnProfile = session?.user?.id === user.id;
+    requireUserEditAccess(session?.user?.role, user.role, locale, isOwnProfile);
 
     return (
         <main>

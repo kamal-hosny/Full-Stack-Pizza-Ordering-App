@@ -1,9 +1,10 @@
 import { formatCurrency } from "@/lib/formatters";
 import Image from "next/image";
 import AddToCartButton from "./AddToCartButton";
+type MenuTranslations = typeof import("@/dictionaries/en.json")["menuItem"];
 import { ProductWithRelations } from "@/types/product";
 
-const MenuItem = ({ item }: { item: ProductWithRelations }) => {
+const MenuItem = ({ item, translations }: { item: ProductWithRelations; translations: MenuTranslations }) => {
   return (
     <div className="bg-[#fdf8f2] rounded-2xl shadow-[0_10px_20px_rgba(0,0,0,0.08)] overflow-hidden border-2 border-amber-100 transition-all duration-300 hover:shadow-[0_15px_30px_rgba(0,0,0,0.15)] hover:-translate-y-1 group relative">
       {/* Pizza Box Design Elements */}
@@ -28,7 +29,7 @@ const MenuItem = ({ item }: { item: ProductWithRelations }) => {
         
         {/* Popular tag as pizza slice */}
         <div className="absolute top-4 right-4 bg-white text-red-600 text-xs font-bold px-3 py-2 rounded-full shadow-lg rotate-6 flex items-center">
-          <span className="mr-1">🍕</span> POPULAR
+          <span className="mr-1">🍕</span> {translations.popular}
         </div>
       </div>
 
@@ -48,7 +49,7 @@ const MenuItem = ({ item }: { item: ProductWithRelations }) => {
         </p>
 
         <div className="mt-4 flex justify-center">
-          <AddToCartButton item={item} />
+          <AddToCartButton item={item} translations={translations} />
         </div>
       </div>
       

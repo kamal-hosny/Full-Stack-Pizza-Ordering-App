@@ -1,18 +1,10 @@
 "use client";
 
 import Link from "@/components/link";
-import { buttonVariants } from "@/components/ui/button";
 import { Pages, Routes } from "@/constants/enums";
 import { Translations } from "@/types/translations";
 import { useParams, usePathname } from "next/navigation";
-import { 
-  User, 
-  FolderOpen, 
-  Package, 
-  Users, 
-  ShoppingCart,
-  BarChart3
-} from "lucide-react";
+import { FolderOpen, Package, Users, ShoppingCart, BarChart3 } from "lucide-react";
 
 function AdminTabs({ translations }: { translations: Translations }) {
   const pathname = usePathname();
@@ -72,8 +64,8 @@ function AdminTabs({ translations }: { translations: Translations }) {
                   href={`/${locale}/${tab.href}`}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                     isActive
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                      ? "bg-[#fe0019] text-white shadow-md"
+                      : "text-gray-600 hover:text-[#fe0019] hover:bg-[#fe0019]/10"
                   }`}
                 >
                   <Icon className="h-4 w-4" />

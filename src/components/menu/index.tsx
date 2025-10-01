@@ -2,11 +2,13 @@
 import MenuItem from "./MenuItem";
 import { ProductWithRelations } from "@/types/product";
 
-const Menu = ({ items }: { items: ProductWithRelations[] }) => {
+type MenuTranslations = typeof import("@/dictionaries/en.json")["menuItem"];
+
+const Menu = ({ items, translations }: { items: ProductWithRelations[]; translations: MenuTranslations }) => {
   return items.length > 0 ? (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
       {items.map((item: ProductWithRelations) => (
-        <MenuItem key={item.id} item={item} />
+        <MenuItem key={item.id} item={item} translations={translations} />
       ))}
     </div>
   ) : (

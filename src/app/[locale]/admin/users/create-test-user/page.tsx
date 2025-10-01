@@ -1,6 +1,6 @@
 import { db } from "@/lib/prisma";
 import { UserRole } from "@/constants/enums";
-import { redirect } from "next/navigation";
+import Link from "@/components/link";
 
 async function CreateTestUserPage() {
     try {
@@ -47,9 +47,9 @@ async function CreateTestUserPage() {
             <div className="p-8">
                 <h1 className="text-2xl font-bold mb-4 text-green-600">Test Users Created Successfully!</h1>
                 <p>Created test users in the database.</p>
-                <a href="/en/admin/users" className="text-blue-600 underline">
+                <Link href="/en/admin/users" className="text-blue-600 underline">
                     Go to Users Page
-                </a>
+                </Link>
             </div>
         );
     } catch (error) {

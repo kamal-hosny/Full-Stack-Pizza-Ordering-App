@@ -24,7 +24,9 @@ const stripePromise = loadStripe(
   "pk_test_51S9Ia6KsxJcoCyADTDwbOoqNklhoeh0fQO0VB9xI3FHK0HycMJCNnJbzMrqPPbqTw71ROXuazqkutsC9b0BVGeWE00TsA61Xyw"
 );
 
-const CheckoutForm = () => {
+type CartTrans = typeof import("@/dictionaries/en.json")["cart"];
+
+const CheckoutForm = ({ trans }: { trans: CartTrans }) => {
   const cart = useAppSelector(selectCartItems);
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -138,7 +140,7 @@ const CheckoutForm = () => {
     cart &&
     cart.length > 0 && (
       <div className="grid gap-6">
-        <h2 className="text-2xl font-bold text-gray-800 border-b pb-3">Checkout Details</h2>
+        <h2 className="text-2xl font-bold text-gray-800 border-b pb-3">{trans.checkout.title}</h2>
         
         <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4">
           <div className="flex items-start gap-3">
@@ -146,9 +148,9 @@ const CheckoutForm = () => {
               <FaLock className="text-blue-600" />
             </div>
             <div>
-              <h3 className="font-bold text-blue-800">Secure Checkout</h3>
+              <h3 className="font-bold text-blue-800">{trans.checkout.secureTitle}</h3>
               <p className="text-sm text-blue-700 mt-1">
-                Your information is protected with 256-bit SSL encryption
+                {trans.checkout.secureDescription}
               </p>
             </div>
           </div>
@@ -162,11 +164,11 @@ const CheckoutForm = () => {
                   <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                   <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                 </svg>
-                Email Address
+                {trans.checkout.email}
               </Label>
               <Input
                 id="email"
-                placeholder="john@example.com"
+                placeholder={trans.checkout.emailPlaceholder}
                 type="email"
                 name="email"
                 className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent ${
@@ -184,11 +186,11 @@ const CheckoutForm = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
-                Phone Number
+                {trans.checkout.phone}
               </Label>
               <Input
                 id="phone"
-                placeholder="+1 (555) 123-4567"
+                placeholder={trans.checkout.phonePlaceholder}
                 type="tel"
                 name="phone"
                 className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent ${
@@ -204,11 +206,11 @@ const CheckoutForm = () => {
             <div className="grid gap-2">
               <Label htmlFor="address" className="text-gray-700 font-medium flex items-center gap-2">
                 <FaHome className="text-gray-500" />
-                Street Address
+                {trans.checkout.address}
               </Label>
               <Textarea
                 id="address"
-                placeholder="123 Main St, Apt 4B"
+                placeholder={trans.checkout.addressPlaceholder}
                 name="address"
                 rows={3}
                 className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${
@@ -225,12 +227,12 @@ const CheckoutForm = () => {
               <div className="grid gap-2">
                 <Label htmlFor="postal-code" className="text-gray-700 font-medium flex items-center gap-2">
                   <FaMapMarkerAlt className="text-gray-500" />
-                  Postal Code
+                  {trans.checkout.postalCode}
                 </Label>
                 <Input
                   type="text"
                   id="postal-code"
-                  placeholder="12345"
+                  placeholder={trans.checkout.postalCodePlaceholder}
                   name="postal-code"
                   className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent ${
                     errors.postalCode ? 'border-red-500' : 'border-gray-300'
@@ -244,12 +246,12 @@ const CheckoutForm = () => {
               <div className="grid gap-2">
                 <Label htmlFor="city" className="text-gray-700 font-medium flex items-center gap-2">
                   <FaMapMarkerAlt className="text-gray-500" />
-                  City
+                  {trans.checkout.city}
                 </Label>
                 <Input
                   type="text"
                   id="city"
-                  placeholder="New York"
+                  placeholder={trans.checkout.cityPlaceholder}
                   name="city"
                   className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent ${
                     errors.city ? 'border-red-500' : 'border-gray-300'
@@ -263,12 +265,12 @@ const CheckoutForm = () => {
               <div className="grid gap-2">
                 <Label htmlFor="country" className="text-gray-700 font-medium flex items-center gap-2">
                   <FaGlobe className="text-gray-500" />
-                  Country
+                  {trans.checkout.country}
                 </Label>
                 <Input
                   type="text"
                   id="country"
-                  placeholder="United States"
+                  placeholder={trans.checkout.countryPlaceholder}
                   name="country"
                   className={`py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent ${
                     errors.country ? 'border-red-500' : 'border-gray-300'
@@ -283,11 +285,11 @@ const CheckoutForm = () => {
             
             <div className="grid gap-2">
               <Label htmlFor="notes" className="text-gray-700 font-medium">
-                ملاحظات إضافية (اختياري)
+                {trans.checkout.notesLabel}
               </Label>
               <Textarea
                 id="notes"
-                placeholder="أي ملاحظات خاصة بالطلب..."
+                placeholder={trans.checkout.notesPlaceholder}
                 name="notes"
                 className="py-3 px-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent border-gray-300"
                 rows={3}
@@ -297,7 +299,7 @@ const CheckoutForm = () => {
             {/* Payment Method Selection */}
             <div className="grid gap-4">
               <Label className="text-gray-700 font-medium text-lg">
-                طريقة الدفع
+                {trans.checkout.paymentMethod}
               </Label>
               
               <div className="grid gap-3">
@@ -322,8 +324,8 @@ const CheckoutForm = () => {
                     </div>
                     <FaMoneyBillWave className="text-2xl text-green-600" />
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800">الدفع عند الاستلام</h3>
-                      <p className="text-sm text-gray-600">ادفع نقداً عند تسليم الطلب</p>
+                      <h3 className="font-semibold text-gray-800">{trans.checkout.codTitle}</h3>
+                      <p className="text-sm text-gray-600">{trans.checkout.codDesc}</p>
                     </div>
                   </div>
                 </div>
@@ -349,8 +351,8 @@ const CheckoutForm = () => {
                     </div>
                     <FaCreditCard className="text-2xl text-blue-600" />
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800">الدفع الإلكتروني</h3>
-                      <p className="text-sm text-gray-600">ادفع بأمان عبر البطاقة الائتمانية</p>
+                      <h3 className="font-semibold text-gray-800">{trans.checkout.cardTitle}</h3>
+                      <p className="text-sm text-gray-600">{trans.checkout.cardDesc}</p>
                     </div>
                     <div className="flex gap-1">
                       <div className="w-8 h-5 bg-blue-600 rounded text-white text-xs flex items-center justify-center font-bold">V</div>
@@ -364,15 +366,15 @@ const CheckoutForm = () => {
             <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="space-y-2 mb-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Subtotal:</span>
+                  <span className="text-gray-700">{trans.checkout.summarySubtotal}</span>
                   <span className="text-gray-700">{formatCurrency(totalAmount)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Delivery Fee:</span>
+                  <span className="text-gray-700">{trans.checkout.summaryDelivery}</span>
                   <span className="text-gray-700">{formatCurrency(5.00)}</span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                  <span className="text-gray-700 font-bold text-lg">Total:</span>
+                  <span className="text-gray-700 font-bold text-lg">{trans.checkout.summaryTotal}</span>
                   <span className="text-2xl font-bold text-primary">{formatCurrency(totalAmount + 5.00)}</span>
                 </div>
               </div>
@@ -384,6 +386,7 @@ const CheckoutForm = () => {
                     totalAmount={totalAmount + 5.00}
                     onPaymentSuccess={handlePaymentSuccess}
                     onPaymentError={handlePaymentError}
+                    trans={trans}
                   />
                 </Elements>
               ) : (
@@ -394,19 +397,19 @@ const CheckoutForm = () => {
                   {isProcessing ? (
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-5 h-5 border-t-2 border-white border-solid rounded-full animate-spin"></div>
-                      {paymentMethod === "STRIPE" ? "Creating Order..." : "Creating Order..."}
+                      {trans.checkout.creatingOrder}
                     </div>
                   ) : (
                     <>
                       {paymentMethod === "STRIPE" ? (
                         <>
                           <FaCreditCard className="mr-2" />
-                          Create Order & Pay
+                          {trans.checkout.createAndPay}
                         </>
                       ) : (
                         <>
                           <FaMoneyBillWave className="mr-2" />
-                          Place Order (Cash on Delivery)
+                          {trans.checkout.placeOrderCOD}
                         </>
                       )}
                     </>
@@ -415,7 +418,7 @@ const CheckoutForm = () => {
               )}
               
               <p className="text-center text-gray-500 text-sm mt-4">
-                By placing your order, you agree to our <a href="#" className="text-primary hover:underline">Terms of Service</a>
+                {trans.checkout.tosNote} <a href="#" className="text-primary hover:underline">{trans.checkout.tos}</a>
               </p>
             </div>
           </div>

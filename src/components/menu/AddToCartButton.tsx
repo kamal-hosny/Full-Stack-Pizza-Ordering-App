@@ -27,8 +27,9 @@ import {
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import React, { useState } from "react";
 import { getItemQuantity } from "@/lib/cart";
+type MenuTranslations = typeof import("@/dictionaries/en.json")["menuItem"];
 
-const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
+const AddToCartButton = ({ item, translations }: { item: ProductWithRelations; translations: MenuTranslations }) => {
   const cart = useAppSelector(selectCartItems);
   const quantity = getItemQuantity(item.id, cart);
   const dispatch = useAppDispatch();
@@ -44,6 +45,7 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
 
   const [selectedSize, setSelectedSize] = useState<Size | null>(defaultSize || null);
   const [selectedExtras, setSelectedExtras] = useState<Extra[]>(defaultExtras);
+  const [selectedQuantity, setSelectedQuantity] = useState<number>(quantity === 0 ? 1 : quantity);
 
   let totalPrice = item.basePrice;
   if (selectedSize) {
@@ -69,6 +71,7 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
         name: item.name,
         size: selectedSize,
         extras: selectedExtras,
+        quantity: selectedQuantity,
       })
     );
   };
@@ -89,33 +92,33 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
     <Dialog>
       <DialogTrigger asChild>
         <Button className="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-full shadow-md transition-all">
-          Add to Cart
+          {translations.addToCart}
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-md rounded-xl border-0 bg-white p-6 shadow-xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader className="items-center text-center">
-          <div className="relative w-40 h-40 mx-auto mb-4">
+      <DialogContent className="max-w-2xl rounded-2xl border border-gray-100 bg-white p-0 shadow-2xl overflow-y-auto max-h-[80vh]">
+        <DialogHeader className="px-6 pt-6 pb-3 border-b bg-gradient-to-b from-gray-50 to-white">
+          <div className="relative w-48 h-48 mx-auto mb-4">
             <Image
               src={item.image}
               alt={item.name}
               fill
-              className="object-contain rounded-lg"
+              className="object-contain rounded-xl shadow-sm"
             />
           </div>
-          <DialogTitle className="text-2xl font-bold text-gray-800">
+          <DialogTitle className="text-2xl font-bold text-gray-900 text-center">
             {item.name}
           </DialogTitle>
-          <DialogDescription className="text-gray-600 mt-2">
+          <DialogDescription className="text-gray-600 mt-2 text-center max-w-2xl mx-auto">
             {item.description}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-8 py-4">
+        <div className="space-y-8 p-6">
           {/* Size Selection */}
           <div className="space-y-4">
-            <h3 className="font-medium text-gray-700 flex items-center">
-              <span className="bg-primary/10 text-primary p-1 rounded mr-2">
+            <h3 className="font-semibold text-gray-900 flex items-center text-sm uppercase tracking-wide">
+              <span className="bg-primary/10 text-primary p-1.5 rounded-md mr-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -142,8 +145,8 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
 
           {/* Extras Selection */}
           <div className="space-y-4">
-            <h3 className="font-medium text-gray-700 flex items-center">
-              <span className="bg-primary/10 text-primary p-1 rounded mr-2">
+            <h3 className="font-semibold text-gray-900 flex items-center text-sm uppercase tracking-wide">
+              <span className="bg-primary/10 text-primary p-1.5 rounded-md mr-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -168,35 +171,99 @@ const AddToCartButton = ({ item }: { item: ProductWithRelations }) => {
           </div>
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 text-lg font-bold text-gray-800">
-            Total:  {formatCurrency(totalPrice * quantity)}
+        <DialogFooter className="px-6 py-4 border-t bg-gray-50 flex flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center flex-col-reverse gap-4">
+            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-2 py-1 shadow-sm">
+              {quantity === 0 ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-9 h-9 rounded-full hover:bg-gray-100"
+                    onClick={() => setSelectedQuantity((q) => Math.max(1, q - 1))}
+                  >
+                    −
+                  </Button>
+                  <span className="min-w-[2ch] text-center font-semibold text-gray-900">
+                    {selectedQuantity}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-9 h-9 rounded-full hover:bg-gray-100"
+                    onClick={() => setSelectedQuantity((q) => Math.min(99, q + 1))}
+                  >
+                    +
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-9 h-9 rounded-full hover:bg-gray-100 text-red-600"
+                    onClick={() => dispatch(removeCartItem({ id: item.id }))}
+                  >
+                    −
+                  </Button>
+                  <span className="min-w-[2ch] text-center font-semibold text-gray-900">
+                    {quantity}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-9 h-9 rounded-full hover:bg-gray-100 text-green-600"
+                    disabled={!selectedSize}
+                    onClick={() => {
+                      if (selectedSize) {
+                        dispatch(
+                          addCartItem({
+                            basePrice: item.basePrice,
+                            id: item.id,
+                            image: item.image,
+                            name: item.name,
+                            extras: selectedExtras,
+                            size: selectedSize,
+                          })
+                        );
+                      }
+                    }}
+                  >
+                    +
+                  </Button>
+                </>
+              )}
+            </div>
+            <div className="text-xl font-bold  text-gray-900">
+              {formatCurrency(totalPrice * (quantity === 0 ? selectedQuantity : quantity))}
+            </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse gap-2">
             <DialogClose asChild>
               <Button
                 variant="outline"
-                className="border-gray-300 text-gray-600 hover:bg-gray-100 px-6"
+                className="border-gray-200 text-gray-700 hover:bg-gray-100 px-6"
               >
                 Cancel
               </Button>
             </DialogClose>
-            {quantity === 0 ? (
+            {quantity === 0 && (
               <Button
                 type="submit"
                 onClick={handleAddToCart}
                 disabled={!selectedSize}
-                className="bg-primary hover:bg-primary/90 px-8 py-2 font-medium text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="bg-primary hover:bg-primary/90 px-8 py-2 font-semibold text-white disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm"
               >
-                Add to cart {formatCurrency(totalPrice)}
+                Add to cart
               </Button>
-            ) : (
-              <ChooseQuantity
-                quantity={quantity}
-                item={item}
-                selectedSize={selectedSize}
-                selectedExtras={selectedExtras}
-              />
+            )}
+            {quantity > 0 && (
+              <Button
+                onClick={() => dispatch(removeItemFromCart({ id: item.id }))}
+                className="bg-red-600 hover:bg-red-700 text-white px-6"
+              >
+                Remove from cart
+              </Button>
             )}
           </div>
         </DialogFooter>
@@ -341,84 +408,4 @@ function Extras({
   );
 }
 
-function ChooseQuantity({
-  quantity,
-  item,
-  selectedExtras,
-  selectedSize,
-}: {
-  quantity: number;
-  selectedExtras: Extra[];
-  selectedSize: Size | null;
-  item: ProductWithRelations;
-}) {
-  const dispatch = useAppDispatch();
-  const totalPrice = item.basePrice + (selectedSize?.price || 0) + 
-                    selectedExtras.reduce((sum, extra) => sum + extra.price, 0);
-
-  return (
-    <div className="flex flex-col gap-3 w-full">
-      <div className="flex items-center justify-between bg-gradient-to-r from-amber-50 to-red-50 p-3 rounded-xl border-2 border-amber-200 shadow-sm">
-        <div className="flex items-center">
-          <div className="bg-amber-500 text-white text-sm font-bold w-8 h-8 rounded-full flex items-center justify-center mr-3">
-            {quantity}
-          </div>
-          <div>
-            <div className="text-sm text-gray-600">In your cart</div>
-            <div className="font-bold text-red-700">
-              {formatCurrency(totalPrice * quantity)}
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-1 bg-white p-1 rounded-full shadow-inner">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-red-600 hover:bg-red-50 w-8 h-8 rounded-full"
-            onClick={() => dispatch(removeCartItem({ id: item.id }))}
-          >
-            <span className="text-lg">-</span>
-          </Button>
-          
-          <div className="w-px h-6 bg-amber-200 mx-1"></div>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-green-600 hover:bg-green-50 w-8 h-8 rounded-full"
-            disabled={!selectedSize}
-            onClick={() => {
-              if (selectedSize) {
-                dispatch(
-                  addCartItem({
-                    basePrice: item.basePrice,
-                    id: item.id,
-                    image: item.image,
-                    name: item.name,
-                    extras: selectedExtras,
-                    size: selectedSize,
-                  })
-                );
-              }
-            }}
-          >
-            <span className="text-lg">+</span>
-          </Button>
-        </div>
-      </div>
-      
-      <Button
-        className="bg-gradient-to-r from-amber-50 to-amber-100 border-2 border-amber-200 text-red-600 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 font-bold py-3 transition-all group flex items-center justify-center"
-        onClick={() => dispatch(removeItemFromCart({ id: item.id }))}
-      >
-        <span className="flex items-center">
-          Remove Pizza 
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 group-hover:scale-110 transition-transform">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-          </svg>
-        </span>
-      </Button>
-    </div>
-  );
-}
+// ChooseQuantity component removed per UX change

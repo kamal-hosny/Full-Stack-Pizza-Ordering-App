@@ -7,6 +7,12 @@ export async function POST(request: NextRequest) {
   try {
     const { orderId, userEmail, userName, status, orderItems, totalPrice } = await request.json();
 
+    interface EmailOrderItem {
+      productName: string;
+      quantity: number;
+      price: number;
+    }
+
     const statusMessages = {
       PENDING: "طلبك في الانتظار",
       CONFIRMED: "تم تأكيد طلبك",
@@ -126,7 +132,7 @@ export async function POST(request: NextRequest) {
 
           <div class="order-details">
             <h3 style="margin-top: 0; color: #e74c3c;">تفاصيل الطلب #${orderId.slice(-8)}</h3>
-            ${orderItems.map((item: any) => `
+            ${(orderItems as EmailOrderItem[]).map((item) => `
               <div class="order-item">
                 <span>${item.productName} × ${item.quantity}</span>
                 <span>${item.price.toFixed(2)} ريال</span>

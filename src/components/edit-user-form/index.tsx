@@ -9,6 +9,7 @@ import { CameraIcon } from 'lucide-react';
 import { Session } from 'next-auth';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
+import { canChangeUserRole, canEditUserData } from '@/lib/permissions';
 
 import React, { useActionState, useEffect, useState } from 'react'
 import { Checkbox } from '../ui/checkbox';
@@ -50,6 +51,20 @@ const EditUserForm = ({
     const [selectedImage, setSelectedImage] = useState(user?.image ?? "")
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [isAdmin, setIsAdmin] = useState(user?.role === UserRole.ADMIN);
+    const [isSuperAdmin, setIsSuperAdmin] = useState(user?.role === UserRole.SUPER_ADMIN);
+    
+    // التحقق من الصلاحيات
+    const currentUserRole = session.data?.user.role as UserRole;
+    const targetUserRole = user?.role as UserRole;
+    
+    // التحقق من وجود حقول فارغة
+    const hasEmptyFields = !user?.phone || !user?.streetAddress || !user?.postalCode || !user?.city || !user?.country;
+    
+    // التحقق من أن المستخدم يعدل بياناته الشخصية
+    const isOwnProfile = session.data?.user?.id === user?.id;
+    
+    const canEdit = canEditUserData(currentUserRole, targetUserRole, hasEmptyFields, isOwnProfile);
+    /* const canChangeRole = */ canChangeUserRole(currentUserRole, targetUserRole, UserRole.ADMIN);
 
     const [state, action, pending] = useActionState(
         async (prevState: unknown, formData: FormData) => {
@@ -60,7 +75,15 @@ const EditUserForm = ({
             } else {
                 console.log("No file selected in action");
             }
-            return updateProfile(isAdmin, prevState, formData);
+            // تحديد الرتبة الجديدة
+            let newRole: UserRole = UserRole.USER;
+            if (isSuperAdmin) {
+                newRole = UserRole.SUPER_ADMIN;
+            } else if (isAdmin) {
+                newRole = UserRole.ADMIN;
+            }
+            
+            return updateProfile(newRole, prevState, formData);
         },
         initialState
     );
@@ -196,16 +219,80 @@ const EditUserForm = ({
                             </div>
                         );
                     }) || []}
-                    {session.data?.user.role === UserRole.ADMIN && (
-                        <div className="flex items-center gap-2 my-4">
+                    {/* خيارات الرتب - Super Admin فقط يمكنه تغيير الرتب */}
+                    {currentUserRole === UserRole.SUPER_ADMIN && !isOwnProfile && (
+                        <div className="space-y-3 my-4 p-4 border rounded-lg bg-gray-50">
+                            <h3 className="text-sm font-semibold text-gray-900">{translations.profile.role.changeRole}</h3>
+                            
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    name="superAdmin"
+                                    checked={isSuperAdmin}
+                                    onClick={() => {
+                                        setIsSuperAdmin(!isSuperAdmin);
+                                        if (!isSuperAdmin) {
+                                            setIsAdmin(false);
+                                        }
+                                    }}
+                                />
+                                <label htmlFor="superAdmin" className="text-sm font-medium">
+                                    {translations.profile.role.superAdmin}
+                                </label>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    name="admin"
+                                    checked={isAdmin}
+                                    onClick={() => {
+                                        setIsAdmin(!isAdmin);
+                                        if (!isAdmin) {
+                                            setIsSuperAdmin(false);
+                                        }
+                                    }}
+                                />
+                                <label htmlFor="admin" className="text-sm font-medium">
+                                    {translations.profile.role.admin}
+                                </label>
+                            </div>
+                            
+                            {!isAdmin && !isSuperAdmin && (
+                                <div className="text-sm text-gray-600">
+                                    {translations.profile.role.user}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    
+                    {/* Admin يمكنه رفع المستخدمين العاديين إلى Admin فقط */}
+                    {currentUserRole === UserRole.ADMIN && targetUserRole === UserRole.USER && !isOwnProfile && (
+                        <div className="flex items-center gap-2 my-4 p-4 border rounded-lg bg-blue-50">
                             <Checkbox
                                 name="admin"
                                 checked={isAdmin}
                                 onClick={() => setIsAdmin(!isAdmin)}
                             />
                             <label htmlFor="admin" className="text-sm font-medium">
-                                Admin
+                                {translations.profile.role.promoteToAdmin}
                             </label>
+                        </div>
+                    )}
+                    
+                    {/* رسالة تحذيرية إذا لم يكن لديه صلاحية التعديل */}
+                    {!canEdit && !isOwnProfile && (
+                        <div className="my-4 p-4 border border-yellow-200 rounded-lg bg-yellow-50">
+                            <p className="text-sm text-yellow-800">
+                                ⚠️ {translations.profile.permissions.cannotEdit}
+                            </p>
+                        </div>
+                    )}
+                    
+                    {/* رسالة تأكيدية إذا كان يعدل بياناته الشخصية */}
+                    {isOwnProfile && (
+                        <div className="my-4 p-4 border border-green-200 rounded-lg bg-green-50">
+                            <p className="text-sm text-green-800">
+                                ✅ {translations.profile.permissions.canEditOwn}
+                            </p>
                         </div>
                     )}
                     <Button type="submit" className="w-full">

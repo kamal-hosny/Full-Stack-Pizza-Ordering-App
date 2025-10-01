@@ -6,14 +6,17 @@ import { Button } from '@/components/ui/button';
 import { FaCreditCard, FaSpinner } from 'react-icons/fa';
 import { useToast } from "@/hooks/use-toast";
 
+type CartTrans = typeof import("@/dictionaries/en.json")["cart"];
+
 interface StripePaymentFormProps {
   orderId: string;
   totalAmount: number;
   onPaymentSuccess: () => void;
   onPaymentError: (error: string) => void;
+  trans?: CartTrans;
 }
 
-const StripePaymentForm = ({ orderId, totalAmount, onPaymentSuccess, onPaymentError }: StripePaymentFormProps) => {
+const StripePaymentForm = ({ orderId, totalAmount, onPaymentSuccess, onPaymentError, trans }: StripePaymentFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -102,12 +105,12 @@ const StripePaymentForm = ({ orderId, totalAmount, onPaymentSuccess, onPaymentEr
         {isProcessing ? (
           <div className="flex items-center justify-center gap-2">
             <FaSpinner className="animate-spin" />
-            Processing Payment...
+            {trans?.checkout.stripeProcessing || 'Processing Payment...'}
           </div>
         ) : (
           <div className="flex items-center justify-center gap-2">
             <FaCreditCard />
-            Pay ${totalAmount.toFixed(2)}
+            {(trans?.checkout.stripePay || 'Pay')} ${totalAmount.toFixed(2)}
           </div>
         )}
       </Button>

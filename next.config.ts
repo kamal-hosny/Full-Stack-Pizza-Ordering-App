@@ -2,10 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  serverActions: {
-    // Increase body size limit for Server Actions to allow image uploads
-    bodySizeLimit: "10mb",
-  },
   images: {
     remotePatterns: [
       {
@@ -13,7 +9,16 @@ const nextConfig: NextConfig = {
         hostname: "**"
       },
     ],
-  }
+  },
+  // Turbopack configuration (moved from experimental)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
+  },
 };
 
 export default nextConfig;

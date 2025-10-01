@@ -5,8 +5,13 @@ import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { deleteUser } from "../_actions/user";
 import { toast } from "@/hooks/use-toast";
+import { UserRole } from "@prisma/client";
+import { useSession } from "next-auth/react";
+import { canDeleteUser } from "@/lib/permissions";
 
-function DeleteUserButton({ userId }: { userId: string }) {
+function DeleteUserButton({ userId, targetUserRole }: { userId: string; targetUserRole: UserRole }) {
+  const { data: session } = useSession();
+  const currentUserRole = session?.user?.role as UserRole;
   const [state, setState] = useState<{
     pending: boolean;
     status: null | number;
@@ -42,6 +47,11 @@ function DeleteUserButton({ userId }: { userId: string }) {
       });
     }
   }, [state.pending, state.message, state.status]);
+  // التحقق من الصلاحية قبل عرض الزر
+  if (!canDeleteUser(currentUserRole, targetUserRole)) {
+    return null;
+  }
+
   return (
     <Button
       type="button"

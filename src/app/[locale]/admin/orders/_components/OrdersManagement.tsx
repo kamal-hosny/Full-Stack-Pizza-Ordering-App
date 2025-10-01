@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Order, OrderStatus, PaymentMethod, PaymentStatus } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { Order, OrderStatus } from "@prisma/client";
 import { formatCurrency } from "@/lib/formatters";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Download, Search, Filter, Eye, Edit } from "lucide-react";
+import { Download, Search, Filter, Eye } from "lucide-react";
 import OrderDetails from "./OrderDetails";
 import { updateOrderStatus } from "../_actions/order";
+import { Translations } from "@/types/translations";
+import { Locale } from "@/i18n.config";
 
 interface OrderWithProducts extends Order {
   products: Array<{
@@ -28,7 +30,46 @@ interface OrderWithProducts extends Order {
 
 interface OrdersManagementProps {
   orders: OrderWithProducts[];
+  translations: Translations;
+  locale: Locale;
 }
+
+type OrdersTranslations = {
+  filter?: {
+    searchPlaceholder?: string;
+    filterByStatus?: string;
+    allStatuses?: string;
+    apply?: string;
+    exportCsv?: string;
+  };
+  empty?: {
+    title?: string;
+    description?: string;
+  };
+  table?: {
+    order?: string;
+    customer?: string;
+    items?: string;
+    total?: string;
+    status?: string;
+    paymentMethod?: string;
+    paymentStatus?: string;
+    date?: string;
+    actions?: string;
+    item?: string;
+    itemsPlural?: string;
+    subtotal?: string;
+  };
+  modal?: {
+    titlePrefix?: string;
+  };
+  summary?: {
+    totalOrdersPrefix?: string;
+    tipChangeStatus?: string;
+    tipViewDetails?: string;
+    tipExportCsv?: string;
+  };
+};
 
 const statusColors = {
   PENDING: "bg-yellow-100 text-yellow-800",
@@ -39,26 +80,26 @@ const statusColors = {
   CANCELLED: "bg-red-100 text-red-800",
 };
 
-const statusLabels = {
-  PENDING: "في الانتظار",
-  CONFIRMED: "تم التأكيد",
-  PREPARING: "قيد التحضير",
-  READY: "جاهز للاستلام",
-  DELIVERED: "تم التسليم",
-  CANCELLED: "ملغي",
-};
+const getStatusLabels = (t: Translations) => ({
+  PENDING: t.admin.dashboard.statusLabels.PENDING,
+  CONFIRMED: t.admin.dashboard.statusLabels.CONFIRMED,
+  PREPARING: t.admin.dashboard.statusLabels.PREPARING,
+  READY: t.admin.dashboard.statusLabels.READY,
+  DELIVERED: t.admin.dashboard.statusLabels.DELIVERED,
+  CANCELLED: t.admin.dashboard.statusLabels.CANCELLED,
+});
 
-const paymentMethodLabels = {
-  CASH_ON_DELIVERY: "الدفع عند الاستلام",
-  STRIPE: "الدفع الإلكتروني",
-};
+const getPaymentMethodLabels = (locale: Locale) => ({
+  CASH_ON_DELIVERY: locale === "ar" ? "الدفع عند الاستلام" : "Cash on Delivery",
+  STRIPE: locale === "ar" ? "الدفع الإلكتروني" : "Online Payment",
+});
 
-const paymentStatusLabels = {
-  PENDING: "في الانتظار",
-  PAID: "مدفوع",
-  FAILED: "فشل الدفع",
-  REFUNDED: "مسترد",
-};
+const getPaymentStatusLabels = (locale: Locale) => ({
+  PENDING: locale === "ar" ? "في الانتظار" : "Pending",
+  PAID: locale === "ar" ? "مدفوع" : "Paid",
+  FAILED: locale === "ar" ? "فشل الدفع" : "Payment Failed",
+  REFUNDED: locale === "ar" ? "مسترد" : "Refunded",
+});
 
 const paymentStatusColors = {
   PENDING: "bg-yellow-100 text-yellow-800",
@@ -67,23 +108,30 @@ const paymentStatusColors = {
   REFUNDED: "bg-blue-100 text-blue-800",
 };
 
-export default function OrdersManagement({ orders }: OrdersManagementProps) {
+export default function OrdersManagement({ orders, translations, locale }: OrdersManagementProps) {
+  const statusLabels = getStatusLabels(translations);
+  const paymentMethodLabels = getPaymentMethodLabels(locale);
+  const paymentStatusLabels = getPaymentStatusLabels(locale);
+  // Temporary typing bridge until Translations type includes admin.orders
+  const ordersT = (translations as unknown as { admin?: { orders?: OrdersTranslations } }).admin?.orders;
+  const [allOrders, setAllOrders] = useState(orders);
   const [filteredOrders, setFilteredOrders] = useState(orders);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "ALL">("ALL");
-  const [selectedOrder, setSelectedOrder] = useState<OrderWithProducts | null>(null);
+  const [openOrderId, setOpenOrderId] = useState<string | null>(null);
 
   // Filter orders based on search and status
   const handleFilter = () => {
-    let filtered = orders;
+    let filtered = allOrders;
 
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (order) =>
-          order.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.phone.includes(searchTerm) ||
-          order.id.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    const term = searchTerm.trim().toLowerCase();
+    if (term) {
+      filtered = filtered.filter((order) => {
+        const emailMatch = (order.userEmail || "").toLowerCase().includes(term);
+        const phoneMatch = (order.phone || "").toLowerCase().includes(term);
+        const idMatch = (order.id || "").toLowerCase().includes(term);
+        return emailMatch || phoneMatch || idMatch;
+      });
     }
 
     if (statusFilter !== "ALL") {
@@ -93,16 +141,25 @@ export default function OrdersManagement({ orders }: OrdersManagementProps) {
     setFilteredOrders(filtered);
   };
 
+  // Keep local copy of orders in sync with props
+  useEffect(() => {
+    setAllOrders(orders);
+  }, [orders]);
+
+  // Auto-apply filters when inputs or data change
+  useEffect(() => {
+    handleFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allOrders, searchTerm, statusFilter]);
+
   // Update order status
   const handleStatusUpdate = async (orderId: string, newStatus: OrderStatus) => {
     try {
       await updateOrderStatus(orderId, newStatus);
       // Update local state
-      setFilteredOrders(prev =>
-        prev.map(order =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
+      setAllOrders(prev => prev.map(order => (
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )));
     } catch (error) {
       console.error("Error updating order status:", error);
     }
@@ -141,7 +198,7 @@ export default function OrdersManagement({ orders }: OrdersManagementProps) {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="البحث بالبريد الإلكتروني أو الهاتف..."
+                placeholder={ordersT?.filter?.searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 text-sm"
@@ -151,10 +208,10 @@ export default function OrdersManagement({ orders }: OrdersManagementProps) {
           
           <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as OrderStatus | "ALL")}>
             <SelectTrigger className="w-full sm:w-[180px] text-sm">
-              <SelectValue placeholder="فلترة بالحالة" />
+              <SelectValue placeholder={ordersT?.filter?.filterByStatus} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">جميع الحالات</SelectItem>
+              <SelectItem value="ALL">{ordersT?.filter?.allStatuses}</SelectItem>
               {Object.entries(statusLabels).map(([key, label]) => (
                 <SelectItem key={key} value={key} className="text-sm">
                   {label}
@@ -166,12 +223,12 @@ export default function OrdersManagement({ orders }: OrdersManagementProps) {
           <div className="flex gap-2">
             <Button onClick={handleFilter} className="flex items-center gap-2 text-sm px-3 py-2">
               <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">تطبيق الفلتر</span>
+              <span className="hidden sm:inline">{ordersT?.filter?.apply}</span>
             </Button>
 
             <Button onClick={exportToExcel} variant="outline" className="flex items-center gap-2 text-sm px-3 py-2">
               <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">تصدير Excel</span>
+              <span className="hidden sm:inline">{ordersT?.filter?.exportCsv}</span>
             </Button>
           </div>
         </div>
@@ -181,8 +238,8 @@ export default function OrdersManagement({ orders }: OrdersManagementProps) {
       {filteredOrders.length === 0 ? (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
           <div className="text-yellow-600 text-6xl mb-4">📦</div>
-          <h3 className="text-xl font-semibold text-yellow-800 mb-2">لا توجد طلبات</h3>
-          <p className="text-yellow-700">لا توجد طلبات تطابق معايير البحث المحددة.</p>
+          <h3 className="text-xl font-semibold text-yellow-800 mb-2">{ordersT?.empty?.title}</h3>
+          <p className="text-yellow-700">{ordersT?.empty?.description}</p>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -191,31 +248,31 @@ export default function OrdersManagement({ orders }: OrdersManagementProps) {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    رقم الطلب
+                    {ordersT?.table?.order}
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                    العميل
+                    {ordersT?.table?.customer}
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                    العناصر
+                    {ordersT?.table?.items}
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الإجمالي
+                    {ordersT?.table?.total}
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الحالة
+                    {ordersT?.table?.status}
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                    طريقة الدفع
+                    {ordersT?.table?.paymentMethod}
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                    حالة الدفع
+                    {ordersT?.table?.paymentStatus}
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                    التاريخ
+                    {ordersT?.table?.date}
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الإجراءات
+                    {ordersT?.table?.actions}
                   </th>
                 </tr>
               </thead>
@@ -236,7 +293,7 @@ export default function OrdersManagement({ orders }: OrdersManagementProps) {
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
                       <div className="text-sm text-gray-900">
-                        {order.products.length} عنصر
+                        {order.products.length} {(order.products.length === 1 ? ordersT?.table?.item : ordersT?.table?.itemsPlural)}
                       </div>
                       <div className="text-sm text-gray-500 max-w-xs truncate">
                         {order.products.map((op, index) => (
@@ -252,7 +309,7 @@ export default function OrdersManagement({ orders }: OrdersManagementProps) {
                         {formatCurrency(order.totalPrice)}
                       </div>
                       <div className="text-xs text-gray-500 hidden sm:block">
-                        فرعي: {formatCurrency(order.subTotal)}
+                        {ordersT?.table?.subtotal}: {formatCurrency(order.subTotal)}
                       </div>
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
@@ -275,22 +332,21 @@ export default function OrdersManagement({ orders }: OrdersManagementProps) {
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center gap-1 sm:gap-2">
-                        <Dialog>
+                        <Dialog open={openOrderId === order.id} onOpenChange={(open) => setOpenOrderId(open ? order.id : null)}>
                           <DialogTrigger asChild>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setSelectedOrder(order)}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-6xl max-h-[90vh] w-[95vw] overflow-hidden">
                             <DialogHeader className="pb-4">
-                              <DialogTitle className="text-lg sm:text-xl">تفاصيل الطلب #{order.id.slice(-8)}</DialogTitle>
+                              <DialogTitle className="text-lg sm:text-xl">{ordersT?.modal?.titlePrefix} #{order.id.slice(-8)}</DialogTitle>
                             </DialogHeader>
                             <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
-                              {selectedOrder && <OrderDetails order={selectedOrder} />}
+                              <OrderDetails order={order} translations={translations} locale={locale} />
                             </div>
                           </DialogContent>
                         </Dialog>
@@ -329,12 +385,12 @@ export default function OrdersManagement({ orders }: OrdersManagementProps) {
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-blue-800">إدارة الطلبات</h3>
+            <h3 className="text-sm font-medium text-blue-800">{translations.admin.tabs.orders}</h3>
             <div className="mt-2 text-sm text-blue-700">
-              <p>• إجمالي الطلبات: {filteredOrders.length}</p>
-              <p>• يمكنك تغيير حالة الطلبات من القائمة المنسدلة</p>
-              <p>• اضغط على أيقونة العين لعرض تفاصيل الطلب</p>
-              <p>• يمكنك تصدير الطلبات إلى ملف Excel</p>
+              <p>• {(ordersT?.summary?.totalOrdersPrefix || "Total orders: ")}{filteredOrders.length}</p>
+              <p>• {ordersT?.summary?.tipChangeStatus}</p>
+              <p>• {ordersT?.summary?.tipViewDetails}</p>
+              <p>• {ordersT?.summary?.tipExportCsv}</p>
             </div>
           </div>
         </div>

@@ -1,12 +1,13 @@
-
 import Menu from "@/components/menu";
-
 import { getProductsByCategory } from "@/server/db/products";
+import getTrans from "@/lib/translation";
+import { Locale } from "@/i18n.config";
 
-const MenuPage = async () => {
+const MenuPage = async ({ params }: { params: Promise<{ locale: Locale }> }) => {
+  const { locale } = await params;
+  const t = await getTrans(locale);
   const categorites = await getProductsByCategory();
 
-  
   return (
     <main className="bg-gradient-to-b from-amber-50 to-white">
       {categorites.length > 0 ? (
@@ -19,7 +20,7 @@ const MenuPage = async () => {
                 </h1>
                 <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-red-600 mx-auto rounded-full"></div>
               </div>
-              <Menu items={category.products} />
+              <Menu items={category.products} translations={t.menuItem} />
             </div>
           </section>
         ))

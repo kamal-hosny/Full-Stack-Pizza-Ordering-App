@@ -5,7 +5,63 @@ import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
-const Contact = () => {
+type ContactProps = {
+  subTitle?: string;
+  title?: string;
+  formTitle?: string;
+  namePlaceholder?: string;
+  emailPlaceholder?: string;
+  messagePlaceholder?: string;
+  submitText?: string;
+  submittingText?: string;
+  locationLabel?: string;
+  address?: string;
+  phoneLabel?: string;
+  phoneNote?: string;
+  emailLabel?: string;
+  openingHoursLabel?: string;
+  openingHoursValue?: string;
+  // Validation
+  nameRequired?: string;
+  nameMin?: string;
+  emailRequired?: string;
+  emailInvalid?: string;
+  messageRequired?: string;
+  messageMin?: string;
+  // Toasts
+  successTitle?: string;
+  successDescription?: string;
+  errorTitle?: string;
+  errorGeneric?: string;
+};
+
+const Contact = ({
+  subTitle = "Don't hesitate to reach out",
+  title = "Get in Touch",
+  formTitle = "Send us a message",
+  namePlaceholder = "Your Name",
+  emailPlaceholder = "Your Email",
+  messagePlaceholder = "Your Message",
+  submitText = "Send Message",
+  submittingText = "Sending...",
+  locationLabel = "Our Location",
+  address = "123 Pizza Street, Food City",
+  phoneLabel = "Phone Number",
+  phoneNote = "Call us for delivery orders",
+  emailLabel = "Email Us",
+  openingHoursLabel = "Opening Hours",
+  openingHoursValue = "Monday-Sunday: 10AM - 11PM",
+  nameRequired = "Name is required",
+  nameMin = "Name must be at least 2 characters",
+  emailRequired = "Email is required",
+  emailInvalid = "Please enter a valid email address",
+  messageRequired = "Message is required",
+  messageMin = "Message must be at least 10 characters",
+  successTitle = "Message sent successfully!",
+  successDescription = "Thank you for contacting us. We'll get back to you soon.",
+  errorTitle = "Error",
+  errorGeneric = "Something went wrong. Please try again later.",
+}: ContactProps) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -35,21 +91,21 @@ const Contact = () => {
     const newErrors: Record<string, string> = {};
     
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = nameRequired;
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+      newErrors.name = nameMin;
     }
     
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = emailRequired;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = emailInvalid;
     }
     
     if (!formData.message.trim()) {
-      newErrors.message = 'Message is required';
+      newErrors.message = messageRequired;
     } else if (formData.message.trim().length < 10) {
-      newErrors.message = 'Message must be at least 10 characters';
+      newErrors.message = messageMin;
     }
     
     setErrors(newErrors);
@@ -78,8 +134,8 @@ const Contact = () => {
       
       if (response.ok) {
         toast({
-          title: "Message sent successfully!",
-          description: "Thank you for contacting us. We'll get back to you soon.",
+          title: successTitle,
+          description: successDescription,
         });
         
         // Reset form
@@ -90,16 +146,16 @@ const Contact = () => {
         });
       } else {
         toast({
-          title: "Error",
-          description: result.error || "Failed to send message. Please try again.",
+          title: errorTitle,
+          description: result.error || errorGeneric,
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again later.",
+        title: errorTitle,
+        description: errorGeneric,
         variant: "destructive",
       });
     } finally {
@@ -112,11 +168,11 @@ const Contact = () => {
       <div className='container'>
         <div className='text-center max-w-2xl mx-auto mb-12'>
           <MainHeading
-            subTitle={`Don't hesitate to reach out`}
-            title={"Get in Touch"}
+            subTitle={subTitle}
+            title={title}
           />
           <p className='text-gray-600 mt-4'>
-            Have questions about our menu or want to place a special order? Our team is ready to assist you!
+            {/* Optional supporting text could be made translatable later */}
           </p>
         </div>
         
@@ -128,8 +184,8 @@ const Contact = () => {
                   <MapPin className='text-primary w-6 h-6' />
                 </div>
                 <div>
-                  <h3 className='font-bold text-lg mb-1'>Our Location</h3>
-                  <p className='text-gray-600'>123 Pizza Street, Food City</p>
+                  <h3 className='font-bold text-lg mb-1'>{locationLabel}</h3>
+                  <p className='text-gray-600'>{address}</p>
                 </div>
               </div>
               
@@ -138,11 +194,11 @@ const Contact = () => {
                   <Phone className='text-primary w-6 h-6' />
                 </div>
                 <div>
-                  <h3 className='font-bold text-lg mb-1'>Phone Number</h3>
+                  <h3 className='font-bold text-lg mb-1'>{phoneLabel}</h3>
                   <a className='text-2xl font-bold text-primary hover:text-primary-dark transition-colors' href='tel:+2012121212'>
                     +2012121212
                   </a>
-                  <p className='text-gray-600 mt-1'>Call us for delivery orders</p>
+                  <p className='text-gray-600 mt-1'>{phoneNote}</p>
                 </div>
               </div>
               
@@ -151,7 +207,7 @@ const Contact = () => {
                   <Mail className='text-primary w-6 h-6' />
                 </div>
                 <div>
-                  <h3 className='font-bold text-lg mb-1'>Email Us</h3>
+                  <h3 className='font-bold text-lg mb-1'>{emailLabel}</h3>
                   <a href="mailto:info@pizzashop.com" className='text-primary hover:text-primary-dark transition-colors'>
                     info@pizzashop.com
                   </a>
@@ -163,15 +219,15 @@ const Contact = () => {
                   <Clock className='text-primary w-6 h-6' />
                 </div>
                 <div>
-                  <h3 className='font-bold text-lg mb-1'>Opening Hours</h3>
-                  <p className='text-gray-600'>Monday-Sunday: 10AM - 11PM</p>
+                  <h3 className='font-bold text-lg mb-1'>{openingHoursLabel}</h3>
+                  <p className='text-gray-600'>{openingHoursValue}</p>
                 </div>
               </div>
             </div>
           </div>
           
           <div className='bg-white p-8 rounded-xl shadow-lg'>
-            <h3 className='text-xl font-bold mb-6'>Send us a message</h3>
+            <h3 className='text-xl font-bold mb-6'>{formTitle}</h3>
             <form onSubmit={handleSubmit} className='space-y-4'>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div>
@@ -180,7 +236,7 @@ const Contact = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="Your Name" 
+                    placeholder={namePlaceholder}
                     className={`p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-full ${
                       errors.name ? 'border-red-500' : 'border-gray-300'
                     }`}
@@ -195,7 +251,7 @@ const Contact = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="Your Email" 
+                    placeholder={emailPlaceholder}
                     className={`p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-full ${
                       errors.email ? 'border-red-500' : 'border-gray-300'
                     }`}
@@ -210,7 +266,7 @@ const Contact = () => {
                   name="message"
                   value={formData.message}
                   onChange={handleInputChange}
-                  placeholder="Your Message" 
+                  placeholder={messagePlaceholder}
                   rows={4}
                   className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
                     errors.message ? 'border-red-500' : 'border-gray-300'
@@ -227,7 +283,7 @@ const Contact = () => {
                   isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                {isSubmitting ? 'Sending...' : 'Send Message'}
+                {isSubmitting ? submittingText : submitText}
               </button>
             </form>
           </div>

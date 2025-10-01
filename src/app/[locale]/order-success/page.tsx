@@ -1,15 +1,21 @@
 import Link from "@/components/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Home, ShoppingBag } from "lucide-react";
+import getTrans from "@/lib/translation";
+import { Locale } from "@/i18n.config";
 
-interface OrderSuccessPageProps {
-  searchParams: {
+
+type OrderSuccessPageProps = {
+  params: Promise<{ locale: Locale }>;
+  searchParams: Promise<{
     orderId?: string;
-  };
-}
+  }>;
+};
 
-const OrderSuccessPage = ({ searchParams }: OrderSuccessPageProps) => {
-  const { orderId } = searchParams;
+const OrderSuccessPage = async ({ params, searchParams }: OrderSuccessPageProps) => {
+  const { locale } = await params;
+  const t = await getTrans(locale);
+  const { orderId } = await searchParams;
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center py-12">
@@ -25,15 +31,15 @@ const OrderSuccessPage = ({ searchParams }: OrderSuccessPageProps) => {
           {/* Success Message */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-3">
-              Order Placed Successfully! 🎉
+              {t.orderSuccess.title}
             </h1>
             <p className="text-gray-600 mb-4">
-              Thank you for your order! We've received your request and will start preparing your delicious pizza right away.
+              {t.orderSuccess.description}
             </p>
             
             {orderId && (
               <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <p className="text-sm text-gray-600 mb-1">Order ID:</p>
+                <p className="text-sm text-gray-600 mb-1">{t.orderSuccess.orderId}</p>
                 <p className="font-mono text-lg font-bold text-gray-800">
                   #{orderId.slice(-8)}
                 </p>
@@ -41,12 +47,12 @@ const OrderSuccessPage = ({ searchParams }: OrderSuccessPageProps) => {
             )}
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
-              <h3 className="font-semibold text-blue-800 mb-2">What's Next?</h3>
+              <h3 className="font-semibold text-blue-800 mb-2">{t.orderSuccess.whatsNextTitle}</h3>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• We'll start preparing your order immediately</li>
-                <li>• You'll receive a confirmation email shortly</li>
-                <li>• Estimated delivery time: 30-45 minutes</li>
-                <li>• Our delivery team will contact you when they're on the way</li>
+                <li>• {t.orderSuccess.steps.startPreparing}</li>
+                <li>• {t.orderSuccess.steps.emailSoon}</li>
+                <li>• {t.orderSuccess.steps.eta}</li>
+                <li>• {t.orderSuccess.steps.contactOnWay}</li>
               </ul>
             </div>
           </div>
@@ -56,14 +62,14 @@ const OrderSuccessPage = ({ searchParams }: OrderSuccessPageProps) => {
             <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-white py-3">
               <Link href="/">
                 <Home className="w-4 h-4 mr-2" />
-                Back to Home
+                {t.orderSuccess.backToHome}
               </Link>
             </Button>
             
             <Button asChild variant="outline" className="w-full py-3">
               <Link href="/menu">
                 <ShoppingBag className="w-4 h-4 mr-2" />
-                Order More
+                {t.orderSuccess.orderMore}
               </Link>
             </Button>
           </div>
@@ -71,9 +77,9 @@ const OrderSuccessPage = ({ searchParams }: OrderSuccessPageProps) => {
           {/* Contact Info */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <p className="text-sm text-gray-500">
-              Questions about your order? 
+              {t.orderSuccess.questions}
               <Link href="/contact" className="text-green-600 hover:text-green-700 ml-1">
-                Contact us
+                {t.orderSuccess.contactUs}
               </Link>
             </p>
           </div>

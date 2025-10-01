@@ -31,11 +31,13 @@ export const cartSlice = createSlice({
         (item) => item.id === action.payload.id
       );
       if (existingItem) {
-        existingItem.quantity = (existingItem.quantity || 0) + 1;
+        const incrementBy = action.payload.quantity && action.payload.quantity > 0 ? action.payload.quantity : 1;
+        existingItem.quantity = (existingItem.quantity || 0) + incrementBy;
         existingItem.size = action.payload.size;
         existingItem.extras = action.payload.extras;
       } else {
-        state.items.push({ ...action.payload, quantity: 1 });
+        const initialQty = action.payload.quantity && action.payload.quantity > 0 ? action.payload.quantity : 1;
+        state.items.push({ ...action.payload, quantity: initialQty });
       }
     },
     removeCartItem: (state, action: PayloadAction<{ id: string }>) => {

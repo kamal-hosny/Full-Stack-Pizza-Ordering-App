@@ -51,25 +51,45 @@ function Form({
     translations,
   });
 
-  // Remove the problematic formData initialization
-  // The form will use the actual form data from the submission
-
-  const initialState = {
-    message: "",
-    error: {} as Record<string, string[]>,
-    status: 0,
-    formData: null as FormData | null,
+  type ProductFormState = {
+    status: number | null;
+    message?: string;
+    error?: Record<string, string[] | string>;
+    formData?: FormData;
   };
 
-  const [state, action, pending] = useActionState(
-    product
-      ? updateProduct.bind(null, {
-          productId: product.id,
-          options: { sizes, extras },
-        })
-      : addProduct.bind(null, { categoryId, options: { sizes, extras } }),
+  const initialState: ProductFormState = { status: null };
+
+  const normalizeErrors = (
+    errors?: Record<string, string[] | string>
+  ): Record<string, string[]> => {
+    if (!errors) return {};
+    const normalized: Record<string, string[]> = {};
+    Object.entries(errors).forEach(([key, value]) => {
+      normalized[key] = Array.isArray(value) ? value : [value];
+    });
+    return normalized;
+  };
+
+  const [state, action, pending] = useActionState<ProductFormState, FormData>(
+    async (prevState, formData) => {
+      if (product) {
+        return updateProduct(
+          { productId: product.id, options: { sizes, extras } },
+          prevState,
+          formData
+        );
+      }
+      return addProduct(
+        { categoryId, options: { sizes, extras } },
+        prevState,
+        formData
+      );
+    },
     initialState
   );
+
+  const [formResetKey, setFormResetKey] = useState(0);
 
   useEffect(() => {
     console.log("=== FORM DEBUG ===");
@@ -98,11 +118,12 @@ function Form({
         setCategoryId(categories[0]?.id || "");
         setSizes([]);
         setExtras([]);
+        setFormResetKey((prev) => prev + 1);
       }
     }
-  }, [pending, state.message, state.status, selectedImage, categoryId, sizes, extras, categories, state]);
+  }, [pending, state.message, state.status, categories]);
   return (
-    <form key={state.status === 201 ? Date.now() : undefined} action={action} className="flex flex-col md:flex-row gap-10">
+    <form key={formResetKey} action={action} className="flex flex-col md:flex-row gap-10">
       <div>
         <UploadImage
           selectedImage={selectedImage}
@@ -110,7 +131,9 @@ function Form({
         />
         {state?.error?.image && (
           <p className="text-sm text-destructive text-center mt-4 font-medium">
-            {state.error?.image}
+            {Array.isArray(state.error?.image)
+              ? state.error?.image[0]
+              : (state.error?.image as string)}
           </p>
         )}
         {/* Hidden input to send the image URL */}
@@ -127,7 +150,7 @@ function Form({
             <div key={field.name} className="mb-3">
               <FormFields
                 {...field}
-                error={state?.error || {} as Record<string, string[]>}
+                error={normalizeErrors(state?.error)}
                 defaultValue={fieldValue as string}
               />
             </div>

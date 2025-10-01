@@ -113,6 +113,17 @@ export type Translations = {
       city: Field;
       country: Field;
     };
+    role: {
+      changeRole: string;
+      superAdmin: string;
+      admin: string;
+      user: string;
+      promoteToAdmin: string;
+    };
+    permissions: {
+      cannotEdit: string;
+      canEditOwn: string;
+    };
   };
   admin: {
     tabs: {
@@ -121,6 +132,45 @@ export type Translations = {
       menuItems: string;
       users: string;
       orders: string;
+    };
+    dashboard: {
+      welcome: string;
+      overviewToday: string;
+      lastUpdate: string;
+      stats: {
+        totalOrders: string;
+        pendingOrders: string;
+        totalRevenue: string;
+        products: string;
+        categories: string;
+        users: string;
+        changeSinceLastMonth: string; // e.g. "{change} from last month"
+      };
+      statusLabels: {
+        PENDING: string;
+        CONFIRMED: string;
+        PREPARING: string;
+        READY: string;
+        DELIVERED: string;
+        CANCELLED: string;
+      };
+      recentOrdersTitle: string;
+      viewAll: string;
+      noRecentOrders: string;
+      orderNumberPrefix: string; // e.g. "Order #"
+      quickActionsTitle: string;
+      quickActions: {
+        addProduct: string;
+        addProductDesc: string;
+        manageOrders: string;
+        manageOrdersDesc: string;
+        manageCategories: string;
+        manageCategoriesDesc: string;
+        manageUsers: string;
+        manageUsersDesc: string;
+      };
+      profileTitle: string;
+      profileRoleAdmin: string;
     };
     categories: {
       form: {
@@ -134,7 +184,65 @@ export type Translations = {
         };
       };
     };
+    users: {
+      page: {
+        title: string;
+        subtitle: string;
+        cta: {
+          createSuperAdmin: string;
+          createDefaultSuperAdmin: string;
+        };
+        stats: {
+          total: string;
+          superAdmins: string;
+          admins: string;
+          regular: string;
+        };
+        empty: {
+          title: string;
+          description: string;
+        };
+        security: {
+          title: string;
+          description: string;
+        };
+      };
+      list: {
+        sections: {
+          superAdmins: string;
+          admins: string;
+          regular: string;
+        };
+        joinedAt: string;
+        noResults: {
+          title: string;
+          description: string;
+        };
+      };
+      filter: {
+        title: string;
+        searchPlaceholder: string;
+        clear: string;
+        role: string;
+        all: string;
+        admins: string;
+        users: string;
+        sortBy: string;
+        sort: {
+          name: string;
+          email: string;
+          createdAt: string;
+          asc: string;
+          desc: string;
+        };
+      };
+    };
     "menu-items": {
+      page: {
+        title: string;
+        subtitle: string;
+        totalProducts: string;
+      };
       addItemSize: string;
       createNewMenuItem: string;
       addExtraItem: string;

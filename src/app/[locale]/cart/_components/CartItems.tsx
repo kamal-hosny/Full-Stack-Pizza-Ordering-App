@@ -6,7 +6,10 @@ import { removeItemFromCart, selectCartItems } from "@/redux/features/cart/cartS
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { Trash2 } from "lucide-react";
 import Image from "next/image";
-const CartItems = () => {
+
+type CartTrans = typeof import("@/dictionaries/en.json")["cart"];
+
+const CartItems = ({ trans }: { trans: CartTrans }) => {
   const cart = useAppSelector(selectCartItems);
   const dispatch = useAppDispatch();
   const subTotal = getSubTotal(cart);
@@ -14,7 +17,7 @@ const CartItems = () => {
   
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b">Your Order</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b">{trans.items.yourOrder}</h2>
       {cart && cart.length > 0 ? (
         <>
           <ul className="space-y-6">
@@ -38,12 +41,12 @@ const CartItems = () => {
                       <div className="mt-1">
                         {item.size && (
                           <p className='text-sm text-gray-600'>
-                            Size: <span className="text-gray-800 font-medium">{item.size.name}</span>
+                            {trans.items.size}: <span className="text-gray-800 font-medium">{item.size.name}</span>
                           </p>
                         )}
                         {item.extras && item.extras.length > 0 && (
                           <div className="mt-1">
-                            <p className="text-xs text-gray-500">Extras:</p>
+                            <p className="text-xs text-gray-500">{trans.items.extras}:</p>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {item.extras.map((extra) => (
                                 <span 
@@ -74,7 +77,7 @@ const CartItems = () => {
                         variant="ghost"
                         size="icon"
                         className="text-red-500 hover:bg-red-50 hover:text-red-600"
-                        aria-label="Remove item"
+                        aria-label={trans.items.removeItemAria}
                       >
                         <Trash2 size={18} />
                       </Button>
@@ -87,15 +90,15 @@ const CartItems = () => {
           
           <div className='pt-6 space-y-3'>
             <div className="flex justify-between text-gray-600">
-              <span>Subtotal:</span>
+              <span>{trans.items.subtotal}:</span>
               <span className="text-gray-900 font-medium">{formatCurrency(subTotal)}</span>
             </div>
             <div className="flex justify-between text-gray-600">
-              <span>Delivery:</span>
+              <span>{trans.items.delivery}:</span>
               <span className="text-gray-900 font-medium">{formatCurrency(deliveryFee)}</span>
             </div>
             <div className="flex justify-between pt-3 border-t border-gray-200 mt-2 text-lg font-bold text-gray-900">
-              <span>Total:</span>
+              <span>{trans.items.total}:</span>
               <span>{formatCurrency(subTotal + deliveryFee)}</span>
             </div>
           </div>
@@ -107,12 +110,12 @@ const CartItems = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-gray-700 mb-2">Your cart is empty</h3>
+          <h3 className="text-xl font-bold text-gray-700 mb-2">{trans.items.emptyTitle}</h3>
           <p className="text-gray-600 max-w-md">
-            Looks like you haven&apos;t added any items to your cart yet. Start shopping to fill your cart!
+            {trans.items.emptyDescription}
           </p>
           <Button className="mt-6 bg-primary hover:bg-primary-dark">
-            Start Shopping
+            {trans.items.startShopping}
           </Button>
         </div>
       )}

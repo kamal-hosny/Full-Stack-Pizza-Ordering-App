@@ -6,9 +6,12 @@ import getTrans from "@/lib/translation";
 import { updateProfileSchema } from "@/validations/profile";
 import { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auth";
+import { canChangeUserRole, canEditUserData } from "@/lib/permissions";
 
 export const updateProfile = async (
-  isAdmin: boolean,
+  newRole: UserRole,
   prevState: unknown,
   formData: FormData
 ) => {
@@ -76,6 +79,16 @@ export const updateProfile = async (
   }
 
   try {
+    // التحقق من الصلاحيات
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.role) {
+      return {
+        message: "غير مخول للوصول",
+        status: 401,
+        formData,
+      };
+    }
+
     const user = await db.user.findUnique({
       where: {
         email: validatedData.email,
@@ -88,6 +101,36 @@ export const updateProfile = async (
         formData,
       };
     }
+
+    // التحقق من صلاحية التعديل
+    const hasEmptyFields = !user.phone || !user.streetAddress || !user.postalCode || !user.city || !user.country;
+    const isOwnProfile = session.user.id === user.id;
+    
+    if (!canEditUserData(session.user.role as UserRole, user.role, hasEmptyFields, isOwnProfile)) {
+      return {
+        message: "ليس لديك صلاحية لتعديل بيانات هذا المستخدم",
+        status: 403,
+        formData,
+      };
+    }
+
+    // التحقق من صلاحية تغيير الرتبة
+    if (newRole !== user.role && !canChangeUserRole(session.user.role as UserRole, user.role, newRole)) {
+      return {
+        message: "ليس لديك صلاحية لتغيير رتبة هذا المستخدم",
+        status: 403,
+        formData,
+      };
+    }
+    
+    // منع المستخدم من تغيير رتبته بنفسه
+    if (isOwnProfile && newRole !== user.role) {
+      return {
+        message: "لا يمكنك تغيير رتبتك بنفسك",
+        status: 403,
+        formData,
+      };
+    }
     
     // Prepare update data
     const updateData = {
@@ -97,7 +140,7 @@ export const updateProfile = async (
       postalCode: validatedData.postalCode,
       city: validatedData.city,
       country: validatedData.country,
-      role: isAdmin ? UserRole.ADMIN : UserRole.USER,
+      role: newRole,
       ...(imageUrl && { image: imageUrl }), // Only update image if we have a new URL
     };
     

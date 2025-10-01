@@ -20,10 +20,15 @@ import {
 import Link from "@/components/link";
 import { useParams } from "next/navigation";
 import { Routes, Pages } from "@/constants/enums";
+import type { Translations } from "@/types/translations";
+import type { FC } from "react";
 
-interface AdminDashboardProps {
-  user: any;
-  translations: any;
+import { User as PrismaUser, Order } from "@prisma/client";
+
+type RecentOrder = Pick<Order, "id" | "status" | "totalPrice"> & { userEmail: string };
+
+export interface AdminDashboardProps {
+  user: Partial<PrismaUser> | null;
   stats: {
     totalOrders: number;
     totalCategories: number;
@@ -32,7 +37,9 @@ interface AdminDashboardProps {
     pendingOrders: number;
     totalRevenue: number;
   };
-  recentOrders: any[];
+  recentOrders: RecentOrder[];
+  translations: Translations;
+  [key: string]: any;
 }
 
 const statusColors = {
@@ -44,70 +51,70 @@ const statusColors = {
   CANCELLED: "bg-red-100 text-red-800",
 };
 
-const statusLabels = {
-  PENDING: "في الانتظار",
-  CONFIRMED: "تم التأكيد",
-  PREPARING: "قيد التحضير",
-  READY: "جاهز للاستلام",
-  DELIVERED: "تم التسليم",
-  CANCELLED: "ملغي",
+const statusLabelsFallback = {
+  PENDING: "Pending",
+  CONFIRMED: "Confirmed",
+  PREPARING: "Preparing",
+  READY: "Ready",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
 };
 
-export default function AdminDashboard({ user, translations, stats, recentOrders }: AdminDashboardProps) {
+const AdminDashboard: FC<AdminDashboardProps> = ({ user, stats, recentOrders, translations }) => {
   const { locale } = useParams();
 
   const statCards = [
     {
-      title: "إجمالي الطلبات",
+      title: translations.admin.dashboard.stats.totalOrders,
       value: stats.totalOrders,
       icon: ShoppingCart,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "text-[#fe0019]",
+      bgColor: "bg-[#fe0019]/10",
       change: "+12%",
       changeType: "positive"
     },
     {
-      title: "الطلبات المعلقة",
+      title: translations.admin.dashboard.stats.pendingOrders,
       value: stats.pendingOrders,
       icon: Clock,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-50",
+      color: "text-[#fe0019]",
+      bgColor: "bg-[#fe0019]/10",
       change: "+5%",
       changeType: "neutral"
     },
     {
-      title: "إجمالي الإيرادات",
+      title: translations.admin.dashboard.stats.totalRevenue,
       value: formatCurrency(stats.totalRevenue),
       icon: DollarSign,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
+      color: "text-[#fe0019]",
+      bgColor: "bg-[#fe0019]/10",
       change: "+18%",
       changeType: "positive"
     },
     {
-      title: "المنتجات",
+      title: translations.admin.dashboard.stats.products,
       value: stats.totalProducts,
       icon: Package,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      color: "text-[#fe0019]",
+      bgColor: "bg-[#fe0019]/10",
       change: "+3",
       changeType: "positive"
     },
     {
-      title: "الفئات",
+      title: translations.admin.dashboard.stats.categories,
       value: stats.totalCategories,
       icon: FolderOpen,
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50",
+      color: "text-[#fe0019]",
+      bgColor: "bg-[#fe0019]/10",
       change: "+1",
       changeType: "positive"
     },
     {
-      title: "المستخدمين",
+      title: translations.admin.dashboard.stats.users,
       value: stats.totalUsers,
       icon: Users,
-      color: "text-pink-600",
-      bgColor: "bg-pink-50",
+      color: "text-[#fe0019]",
+      bgColor: "bg-[#fe0019]/10",
       change: "+8%",
       changeType: "positive"
     }
@@ -115,53 +122,53 @@ export default function AdminDashboard({ user, translations, stats, recentOrders
 
   const quickActions = [
     {
-      title: "إضافة منتج جديد",
-      description: "أضف منتج جديد إلى القائمة",
+      title: translations.admin.dashboard.quickActions.addProduct,
+      description: translations.admin.dashboard.quickActions.addProductDesc,
       icon: Plus,
       href: `/${locale}/${Routes.ADMIN}/${Pages.MENU_ITEMS}/${Pages.NEW}`,
-      color: "bg-blue-500 hover:bg-blue-600"
+      color: "bg-[#fe0019] hover:bg-[#df0016]"
     },
     {
-      title: "إدارة الطلبات",
-      description: "عرض وإدارة جميع الطلبات",
+      title: translations.admin.dashboard.quickActions.manageOrders,
+      description: translations.admin.dashboard.quickActions.manageOrdersDesc,
       icon: ShoppingCart,
       href: `/${locale}/${Routes.ADMIN}/${Pages.ORDERS}`,
-      color: "bg-green-500 hover:bg-green-600"
+      color: "bg-[#fe0019] hover:bg-[#df0016]"
     },
     {
-      title: "إدارة الفئات",
-      description: "تنظيم فئات المنتجات",
+      title: translations.admin.dashboard.quickActions.manageCategories,
+      description: translations.admin.dashboard.quickActions.manageCategoriesDesc,
       icon: FolderOpen,
       href: `/${locale}/${Routes.ADMIN}/${Pages.CATEGORIES}`,
-      color: "bg-purple-500 hover:bg-purple-600"
+      color: "bg-[#fe0019] hover:bg-[#df0016]"
     },
     {
-      title: "إدارة المستخدمين",
-      description: "عرض وإدارة المستخدمين",
+      title: translations.admin.dashboard.quickActions.manageUsers,
+      description: translations.admin.dashboard.quickActions.manageUsersDesc,
       icon: Users,
       href: `/${locale}/${Routes.ADMIN}/${Pages.USERS}`,
-      color: "bg-orange-500 hover:bg-orange-600"
+      color: "bg-[#fe0019] hover:bg-[#df0016]"
     }
   ];
 
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+      <div className="bg-gradient-to-r from-[#fe0019] to-[#fe0019] rounded-2xl p-8 text-white">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">
-              مرحباً، {user?.name || "المدير"}! 👋
+              {translations.admin.dashboard.welcome}، {user?.name || translations.profile.role.admin}! 👋
             </h1>
-            <p className="text-blue-100 text-lg">
-              إليك نظرة عامة على أداء متجرك اليوم
+            <p className="text-white/80 text-lg">
+              {translations.admin.dashboard.overviewToday}
             </p>
           </div>
           <div className="hidden md:block">
             <div className="text-right">
-              <p className="text-blue-100 text-sm">آخر تحديث</p>
+              <p className="text-white/80 text-sm">{translations.admin.dashboard.lastUpdate}</p>
               <p className="text-white font-semibold">
-                {format(new Date(), "dd/MM/yyyy 'في' HH:mm")}
+                {format(new Date(), "dd/MM/yyyy HH:mm")}
               </p>
             </div>
           </div>
@@ -188,8 +195,8 @@ export default function AdminDashboard({ user, translations, stats, recentOrders
                 </div>
                 <div className="flex items-center text-xs text-gray-500">
                   <TrendingUp className="h-3 w-3 mr-1" />
-                  <span className={stat.changeType === 'positive' ? 'text-green-600' : 'text-gray-600'}>
-                    {stat.change} من الشهر الماضي
+                  <span className={stat.changeType === 'positive' ? 'text-[#fe0019]' : 'text-gray-600'}>
+                    {translations.admin.dashboard.stats.changeSinceLastMonth.replace("{change}", stat.change)}
                   </span>
                 </div>
               </CardContent>
@@ -203,11 +210,11 @@ export default function AdminDashboard({ user, translations, stats, recentOrders
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-semibold">الطلبات الأخيرة</CardTitle>
+              <CardTitle className="text-xl font-semibold">{translations.admin.dashboard.recentOrdersTitle}</CardTitle>
               <Link href={`/${locale}/${Routes.ADMIN}/${Pages.ORDERS}`}>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="border-[#fe0019] text-[#fe0019] hover:bg-[#fe0019]/10">
                   <Eye className="h-4 w-4 mr-2" />
-                  عرض الكل
+                  {translations.admin.dashboard.viewAll}
                 </Button>
               </Link>
             </div>
@@ -216,7 +223,7 @@ export default function AdminDashboard({ user, translations, stats, recentOrders
             {recentOrders.length === 0 ? (
               <div className="text-center py-8">
                 <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">لا توجد طلبات حديثة</p>
+                <p className="text-gray-500">{translations.admin.dashboard.noRecentOrders}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -226,7 +233,7 @@ export default function AdminDashboard({ user, translations, stats, recentOrders
                       <div className="flex items-center gap-3">
                         <div>
                           <p className="font-medium text-gray-900">
-                            طلب #{order.id.slice(-8)}
+                            {translations.admin.dashboard.orderNumberPrefix}{order.id.slice(-8)}
                           </p>
                           <p className="text-sm text-gray-500">{order.userEmail}</p>
                         </div>
@@ -234,7 +241,7 @@ export default function AdminDashboard({ user, translations, stats, recentOrders
                     </div>
                     <div className="text-right">
                       <Badge className={statusColors[order.status as keyof typeof statusColors]}>
-                        {statusLabels[order.status as keyof typeof statusLabels]}
+                        {(translations.admin.dashboard.statusLabels as any)[order.status] ?? statusLabelsFallback[order.status as keyof typeof statusLabelsFallback]}
                       </Badge>
                       <p className="text-sm font-medium text-gray-900 mt-1">
                         {formatCurrency(order.totalPrice)}
@@ -250,7 +257,7 @@ export default function AdminDashboard({ user, translations, stats, recentOrders
         {/* Quick Actions */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">الإجراءات السريعة</CardTitle>
+            <CardTitle className="text-xl font-semibold">{translations.admin.dashboard.quickActionsTitle}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -278,28 +285,29 @@ export default function AdminDashboard({ user, translations, stats, recentOrders
       {/* Profile Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">معلومات الملف الشخصي</CardTitle>
+          <CardTitle className="text-xl font-semibold">{translations.admin.dashboard.profileTitle}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-12 h-12 bg-gradient-to-r from-[#fe0019] to-[#fe0019] rounded-full flex items-center justify-center text-white font-bold text-lg">
                 {user?.name?.charAt(0) || "A"}
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">{user?.name || "المدير"}</h3>
+                <h3 className="font-semibold text-gray-900">{user?.name || translations.profile.role.admin}</h3>
                 <p className="text-sm text-gray-500">{user?.email}</p>
-                <Badge className="bg-green-100 text-green-800 mt-1">مدير</Badge>
+                <Badge className="bg-[#fe0019]/10 text-[#fe0019] mt-1">{translations.admin.dashboard.profileRoleAdmin}</Badge>
               </div>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="border-[#fe0019] text-[#fe0019] hover:bg-[#fe0019]/10">
               <Edit className="h-4 w-4 mr-2" />
-              تعديل الملف
+              {translations.edit}
             </Button>
           </div>
         </CardContent>
       </Card>
     </div>
   );
-}
+};
 
+export default AdminDashboard;

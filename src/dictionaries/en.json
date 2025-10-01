@@ -5,7 +5,11 @@
       "title": "Slice into Happiness",
       "description": "Craving pizza? We've got you covered with fresh ingredients, endless flavors, and the fastest delivery. Your perfect slice is just a tap away!",
       "orderNow": "Order now",
-      "learnMore": "Learn more"
+      "learnMore": "Learn more",
+      "features": {
+        "delivery": "30 Min Delivery",
+        "natural": "100% Natural Ingredients"
+      }
     },
     "bestSeller": {
       "checkOut": "check out",
@@ -18,11 +22,62 @@
         "one": "Welcome to our pizzeria, where we serve the finest pizzas made with the freshest ingredients. Every slice is a masterpiece, crafted with care to deliver the perfect balance of flavors. From classic favorites to unique creations, there's something for every pizza lover!",
         "two": "Our passion for pizza shines through every dish. We hand-pick the best local ingredients and bake them to perfection, ensuring that every bite is delicious and satisfying. Whether you're here for a quick meal or a relaxed dining experience, we’ve got you covered.",
         "three": "Join us on a flavorful journey and experience the joy of pizza like never before. We pride ourselves on delivering great taste, quality, and service to make every meal memorable. Come and taste the difference!"
+      },
+      "buttons": {
+        "meetOurChefs": "Meet Our Chefs",
+        "viewOurMenu": "View Our Menu"
+      },
+      "badge": {
+        "years": "Years of Experience",
+        "count": "10+"
+      },
+      "features": {
+        "f1": "Handmade Dough",
+        "f2": "Fresh Ingredients",
+        "f3": "Wood-Fired Oven",
+        "f4": "Family Recipes"
       }
     },
     "contact": {
       "Don'tHesitate": "Don't hesitate",
-      "contactUs": "Contact us"
+      "contactUs": "Contact us",
+      "form": {
+        "title": "Send us a message",
+        "name": "Your Name",
+        "email": "Your Email",
+        "message": "Your Message",
+        "submit": "Send Message",
+        "submitting": "Sending..."
+      },
+      "location": {
+        "label": "Our Location",
+        "address": "123 Pizza Street, Food City"
+      },
+      "phone": {
+        "label": "Phone Number",
+        "note": "Call us for delivery orders"
+      },
+      "email": {
+        "label": "Email Us"
+      },
+      "openingHours": {
+        "label": "Opening Hours",
+        "value": "Monday-Sunday: 10AM - 11PM"
+      },
+      "validation": {
+        "nameRequired": "Name is required",
+        "nameMin": "Name must be at least 2 characters",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "messageRequired": "Message is required",
+        "messageMin": "Message must be at least 10 characters"
+      },
+      "toasts": {
+        "successTitle": "Message sent successfully!",
+        "successDescription": "Thank you for contacting us. We'll get back to you soon.",
+        "errorTitle": "Error",
+        "errorGeneric": "Failed to send message. Please try again."
+      }
     }
   },
   "navbar": {
@@ -108,7 +163,8 @@
     "deleteUserSucess": "User deleted successfull"
   },
   "menuItem": {
-    "addToCart": "Add to cart"
+    "addToCart": "Add to cart",
+    "popular": "Popular"
   },
   "profile": {
     "title": "Profile",
@@ -158,6 +214,17 @@
           "required": "Country is required"
         }
       }
+    },
+    "role": {
+      "changeRole": "Change Role",
+      "superAdmin": "Super Admin",
+      "admin": "Admin",
+      "user": "User",
+      "promoteToAdmin": "Promote to Admin"
+    },
+    "permissions": {
+      "cannotEdit": "You cannot edit this user's data. You may only fill empty fields for regular users.",
+      "canEditOwn": "You can freely edit your personal data. You cannot change your own role."
     }
   },
   "admin": {
@@ -167,6 +234,45 @@
       "menuItems": "Menu Items",
       "users": "Users",
       "orders": "Orders"
+    },
+    "dashboard": {
+      "welcome": "Welcome",
+      "overviewToday": "Here's an overview of your store performance today",
+      "lastUpdate": "Last Update",
+      "statusLabels": {
+        "PENDING": "Pending",
+        "CONFIRMED": "Confirmed",
+        "PREPARING": "Preparing",
+        "READY": "Ready",
+        "DELIVERED": "Delivered",
+        "CANCELLED": "Cancelled"
+      },
+      "stats": {
+        "totalOrders": "Total Orders",
+        "pendingOrders": "Pending Orders",
+        "totalRevenue": "Total Revenue",
+        "products": "Products",
+        "categories": "Categories",
+        "users": "Users",
+        "changeSinceLastMonth": "{change} from last month"
+      },
+      "recentOrdersTitle": "Recent Orders",
+      "viewAll": "View All",
+      "noRecentOrders": "No recent orders",
+      "orderNumberPrefix": "Order #",
+      "quickActionsTitle": "Quick Actions",
+      "quickActions": {
+        "addProduct": "Add New Product",
+        "addProductDesc": "Add a new product to the menu",
+        "manageOrders": "Manage Orders",
+        "manageOrdersDesc": "View and manage all orders",
+        "manageCategories": "Manage Categories",
+        "manageCategoriesDesc": "Organize product categories",
+        "manageUsers": "Manage Users",
+        "manageUsersDesc": "View and manage users"
+      },
+      "profileTitle": "Profile Information",
+      "profileRoleAdmin": "Admin"
     },
     "categories": {
       "form": {
@@ -180,7 +286,65 @@
         }
       }
     },
+    "users": {
+      "page": {
+        "title": "Manage Users",
+        "subtitle": "View and manage all users in the system",
+        "cta": {
+          "createSuperAdmin": "Create Super Admin",
+          "createDefaultSuperAdmin": "Default Super Admin"
+        },
+        "stats": {
+          "total": "Total Users",
+          "superAdmins": "Super Admins",
+          "admins": "Admins",
+          "regular": "Regular Users"
+        },
+        "empty": {
+          "title": "No Users",
+          "description": "No users found in the system"
+        },
+        "security": {
+          "title": "Security Notice",
+          "description": "This page contains sensitive user information. Do not share this data with unauthorized individuals."
+        }
+      },
+      "list": {
+        "sections": {
+          "superAdmins": "Super Admins ({count})",
+          "admins": "Admins ({count})",
+          "regular": "Regular Users ({count})"
+        },
+        "joinedAt": "Joined on: {date}",
+        "noResults": {
+          "title": "No Results",
+          "description": "No users matched your search criteria"
+        }
+      },
+      "filter": {
+        "title": "Search & Filter",
+        "searchPlaceholder": "Search by name, email, or phone...",
+        "clear": "Clear",
+        "role": "Filter by role:",
+        "all": "All ({count})",
+        "admins": "Admins ({count})",
+        "users": "Users ({count})",
+        "sortBy": "Sort by:",
+        "sort": {
+          "name": "Name",
+          "email": "Email",
+          "createdAt": "Joined Date",
+          "asc": "Ascending",
+          "desc": "Descending"
+        }
+      }
+    },
     "menu-items": {
+      "page": {
+        "title": "Manage Products",
+        "subtitle": "View and manage all menu products",
+        "totalProducts": "Total Products"
+      },
       "createNewMenuItem": "Create new menu item",
       "addItemSize": "Add item size",
       "addExtraItem": "Add extra item",
@@ -221,6 +385,66 @@
           }
         }
       }
+    },
+    "orders": {
+      "filter": {
+        "searchPlaceholder": "Search by email or phone...",
+        "filterByStatus": "Filter by status",
+        "allStatuses": "All statuses",
+        "apply": "Apply filter",
+        "exportCsv": "Export CSV"
+      },
+      "empty": {
+        "title": "No orders",
+        "description": "No orders match the selected filters."
+      },
+      "table": {
+        "order": "Order #",
+        "customer": "Customer",
+        "items": "Items",
+        "item": "item",
+        "itemsPlural": "items",
+        "total": "Total",
+        "status": "Status",
+        "paymentMethod": "Payment Method",
+        "paymentStatus": "Payment Status",
+        "date": "Date",
+        "actions": "Actions",
+        "subtotal": "Subtotal"
+      },
+      "modal": {
+        "titlePrefix": "Order Details"
+      },
+      "summary": {
+        "totalOrdersPrefix": "Total orders: ",
+        "tipChangeStatus": "You can change order status from the dropdown",
+        "tipViewDetails": "Click the eye icon to view order details",
+        "tipExportCsv": "You can export orders to a CSV file"
+      },
+      "details": {
+        "orderNumberPrefix": "Order #",
+        "createdOn": "Created on ",
+        "at": "at",
+        "customerInfo": "Customer Info",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "postalCode": "Postal Code",
+        "notes": "Notes",
+        "orderSummary": "Order Summary",
+        "subtotal": "Subtotal",
+        "deliveryFee": "Delivery Fee",
+        "total": "Total",
+        "paymentMethod": "Payment Method",
+        "paymentStatus": "Payment Status",
+        "paymentId": "Payment ID",
+        "orderItems": "Order Items",
+        "qtyPrefix": "Qty: ",
+        "totalPrefix": "Total: ",
+        "orderTimeline": "Order Timeline",
+        "orderCreated": "Order Created",
+        "orderUpdated": "Order Updated"
+      }
     }
   },
   "category": "Category",
@@ -233,7 +457,94 @@
   "create": "Create",
   "cart": {
     "title": "Shopping Cart",
-    "noItemsInCart": "There are no items in your cart. Add some"
+    "noItemsInCart": "There are no items in your cart. Add some",
+    "badges": {
+      "secure": "Secure checkout with SSL encryption",
+      "moneyBack": "30-day money-back guarantee"
+    },
+    "items": {
+      "yourOrder": "Your Order",
+      "size": "Size",
+      "extras": "Extras",
+      "subtotal": "Subtotal",
+      "delivery": "Delivery",
+      "total": "Total",
+      "emptyTitle": "Your cart is empty",
+      "emptyDescription": "Looks like you haven't added any items to your cart yet. Start shopping to fill your cart!",
+      "startShopping": "Start Shopping",
+      "removeItemAria": "Remove item"
+    },
+    "checkout": {
+      "title": "Checkout Details",
+      "secureTitle": "Secure Checkout",
+      "secureDescription": "Your information is protected with 256-bit SSL encryption",
+      "email": "Email Address",
+      "emailPlaceholder": "john@example.com",
+      "phone": "Phone Number",
+      "phonePlaceholder": "+1 (555) 123-4567",
+      "address": "Street Address",
+      "addressPlaceholder": "123 Main St, Apt 4B",
+      "postalCode": "Postal Code",
+      "postalCodePlaceholder": "12345",
+      "city": "City",
+      "cityPlaceholder": "New York",
+      "country": "Country",
+      "countryPlaceholder": "United States",
+      "notesLabel": "Additional Notes (optional)",
+      "notesPlaceholder": "Any special notes for the order...",
+      "paymentMethod": "Payment Method",
+      "codTitle": "Cash on Delivery",
+      "codDesc": "Pay in cash upon delivery",
+      "cardTitle": "Online Payment",
+      "cardDesc": "Pay securely with your credit card",
+      "summarySubtotal": "Subtotal:",
+      "summaryDelivery": "Delivery Fee:",
+      "summaryTotal": "Total:",
+      "creatingOrder": "Creating Order...",
+      "createAndPay": "Create Order & Pay",
+      "placeOrderCOD": "Place Order (Cash on Delivery)",
+      "tosNote": "By placing your order, you agree to our",
+      "tos": "Terms of Service",
+      "stripeProcessing": "Processing Payment...",
+      "stripePay": "Pay"
+    }
+  },
+  "orderSuccess": {
+    "title": "Order Placed Successfully! 🎉",
+    "description": "Thank you for your order! We've received your request and will start preparing your delicious pizza right away.",
+    "orderId": "Order ID:",
+    "whatsNextTitle": "What's Next?",
+    "steps": {
+      "startPreparing": "We'll start preparing your order immediately",
+      "emailSoon": "You'll receive a confirmation email shortly",
+      "eta": "Estimated delivery time: 30-45 minutes",
+      "contactOnWay": "Our delivery team will contact you when they're on the way"
+    },
+    "backToHome": "Back to Home",
+    "orderMore": "Order More",
+    "questions": "Questions about your order? ",
+    "contactUs": "Contact us"
+  },
+  "footer": {
+    "description": "Crafting delicious pizzas with love since 2010. Our authentic recipes and fresh ingredients make every bite unforgettable.",
+    "quickLinks": {
+      "title": "Quick Links",
+      "items": {
+        "menu": "Menu",
+        "specialOffers": "Special Offers",
+        "locations": "Locations",
+        "aboutUs": "About Us",
+        "contact": "Contact"
+      }
+    },
+    "contact": {
+      "title": "Contact Us",
+      "address": "123 Pizza Street, Food City",
+      "phone": "+2012121212",
+      "email": "info@pizzashop.com",
+      "hours": "10AM - 11PM Daily"
+    },
+    "copyright": "© {year} PizzaShop. All rights reserved."
   },
   "copyRight": "© 2024 All rights reserved",
   "noProductsFound": "No products found",
