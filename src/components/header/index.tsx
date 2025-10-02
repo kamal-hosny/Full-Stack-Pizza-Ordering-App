@@ -21,7 +21,7 @@ const Header = async () => {
         {/* Logo with pizza icon */}
         <Link 
           href={Routes.ROOT} 
-          className="flex items-center gap-2 group"
+          className="flex items-center  gap-2 group"
         >
           <div className="bg-primary w-10 h-10 rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-xl">P</span>
@@ -35,11 +35,15 @@ const Header = async () => {
           <Navbar translations={translations} initialSession={initialSession} />
           <div className="flex items-center gap-4 flex-1 justify-end">
 
-                <AuthButtons
+              <div className="hidden lg:block">
+              <AuthButtons
               translations={translations}
               initialSession={initialSession}
             />
+              </div>
+              <div className="hidden lg:block">
               <LanguageSwitcher />
+              </div>
 
             <CartButton />
           </div>

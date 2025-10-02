@@ -9,12 +9,12 @@ async function About() {
   const t = await getTrans(locale);
   return (
     <section className="section-gap py-16" id={Routes.ABOUT}>
-      <div className="container">
+      <div className="container overflow-hidden">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <MainHeading subTitle={t.home.about.ourStory} title={t.home.about.aboutUs} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ">
           <div className="relative">
             <div className="relative aspect-square rounded-2xl overflow-hidden shadow-xl">
               <Image

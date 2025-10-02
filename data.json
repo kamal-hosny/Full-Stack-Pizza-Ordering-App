@@ -1,0 +1,355 @@
+[
+    {
+      "id": "cat-cheese",
+      "name": "Cheese Pizzas",
+      "order": 1,
+      "products": [
+        {
+          "id": "pizza-margherita",
+          "name": "Margherita",
+          "description": "Pizza with mozzarella cheese and tomato sauce",
+          "image": "/images/margherita.jpg",
+          "basePrice": 5.0,
+          "categoryId": "cat-cheese",
+          "sizes": [
+            { "id": "size1", "name": "SMALL", "price": 5.0 },
+            { "id": "size2", "name": "MEDIUM", "price": 7.5 },
+            { "id": "size3", "name": "LARGE", "price": 10.0 }
+          ],
+          "extras": [
+            { "id": "extra1", "name": "CHEESE", "price": 1.0 },
+            { "id": "extra2", "name": "TOMATO", "price": 0.5 }
+          ]
+        },
+        {
+          "id": "pizza-four-cheese",
+          "name": "Four Cheese",
+          "description": "A perfect blend of 4 cheeses",
+          "image": "/images/fourcheese.jpg",
+          "basePrice": 7.5,
+          "categoryId": "cat-cheese",
+          "sizes": [
+            { "id": "size4", "name": "SMALL", "price": 7.5 },
+            { "id": "size5", "name": "MEDIUM", "price": 10.0 },
+            { "id": "size6", "name": "LARGE", "price": 12.5 }
+          ],
+          "extras": [
+            { "id": "extra3", "name": "PEPPER", "price": 0.6 },
+            { "id": "extra4", "name": "TOMATO", "price": 0.5 }
+          ]
+        },
+        {
+          "id": "pizza-cheddar",
+          "name": "Cheddar",
+          "description": "Cheddar cheese with special sauce",
+          "image": "/images/cheddar.jpg",
+          "basePrice": 6.5,
+          "categoryId": "cat-cheese",
+          "sizes": [
+            { "id": "size7", "name": "SMALL", "price": 6.5 },
+            { "id": "size8", "name": "MEDIUM", "price": 9.0 },
+            { "id": "size9", "name": "LARGE", "price": 11.5 }
+          ],
+          "extras": [
+            { "id": "extra5", "name": "CHEESE", "price": 1.0 }
+          ]
+        },
+        {
+          "id": "pizza-blue-cheese",
+          "name": "Blue Cheese",
+          "description": "Premium blue cheese with mozzarella",
+          "image": "/images/bluecheese.jpg",
+          "basePrice": 8.0,
+          "categoryId": "cat-cheese",
+          "sizes": [
+            { "id": "size10", "name": "SMALL", "price": 8.0 },
+            { "id": "size11", "name": "MEDIUM", "price": 10.5 },
+            { "id": "size12", "name": "LARGE", "price": 13.0 }
+          ],
+          "extras": [
+            { "id": "extra6", "name": "ONION", "price": 0.7 }
+          ]
+        },
+        {
+          "id": "pizza-cheese-burst",
+          "name": "Cheese Burst",
+          "description": "Stuffed cheese crust pizza",
+          "image": "/images/cheeseburst.jpg",
+          "basePrice": 9.0,
+          "categoryId": "cat-cheese",
+          "sizes": [
+            { "id": "size13", "name": "SMALL", "price": 9.0 },
+            { "id": "size14", "name": "MEDIUM", "price": 12.0 },
+            { "id": "size15", "name": "LARGE", "price": 15.0 }
+          ],
+          "extras": [
+            { "id": "extra7", "name": "CHEESE", "price": 1.5 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cat-italian",
+      "name": "Italian Pizzas",
+      "order": 2,
+      "products": [
+        {
+          "id": "pizza-pepperoni",
+          "name": "Pepperoni",
+          "description": "Spicy pepperoni slices with cheese",
+          "image": "/images/pepperoni.jpg",
+          "basePrice": 6.0,
+          "categoryId": "cat-italian",
+          "sizes": [
+            { "id": "size16", "name": "SMALL", "price": 6.0 },
+            { "id": "size17", "name": "MEDIUM", "price": 8.5 },
+            { "id": "size18", "name": "LARGE", "price": 11.0 }
+          ],
+          "extras": [
+            { "id": "extra8", "name": "ONION", "price": 0.7 }
+          ]
+        },
+        {
+          "id": "pizza-hawaiian",
+          "name": "Hawaiian",
+          "description": "Mozzarella with pineapple and ham",
+          "image": "/images/hawaiian.jpg",
+          "basePrice": 6.5,
+          "categoryId": "cat-italian",
+          "sizes": [
+            { "id": "size19", "name": "SMALL", "price": 6.5 },
+            { "id": "size20", "name": "MEDIUM", "price": 8.5 },
+            { "id": "size21", "name": "LARGE", "price": 11.0 }
+          ],
+          "extras": [
+            { "id": "extra9", "name": "CHEESE", "price": 1.0 }
+          ]
+        },
+        {
+          "id": "pizza-napoletana",
+          "name": "Napoletana",
+          "description": "Traditional Napoli tomato sauce and basil",
+          "image": "/images/napoletana.jpg",
+          "basePrice": 7.0,
+          "categoryId": "cat-italian",
+          "sizes": [
+            { "id": "size22", "name": "SMALL", "price": 7.0 },
+            { "id": "size23", "name": "MEDIUM", "price": 9.0 },
+            { "id": "size24", "name": "LARGE", "price": 12.0 }
+          ],
+          "extras": [
+            { "id": "extra10", "name": "TOMATO", "price": 0.5 }
+          ]
+        },
+        {
+          "id": "pizza-capricciosa",
+          "name": "Capricciosa",
+          "description": "Vegetables, mushrooms, artichokes, and olives",
+          "image": "/images/capricciosa.jpg",
+          "basePrice": 8.0,
+          "categoryId": "cat-italian",
+          "sizes": [
+            { "id": "size25", "name": "SMALL", "price": 8.0 },
+            { "id": "size26", "name": "MEDIUM", "price": 10.0 },
+            { "id": "size27", "name": "LARGE", "price": 13.0 }
+          ],
+          "extras": [
+            { "id": "extra11", "name": "ONION", "price": 0.7 },
+            { "id": "extra12", "name": "PEPPER", "price": 0.5 }
+          ]
+        },
+        {
+          "id": "pizza-calzone",
+          "name": "Calzone",
+          "description": "Traditional folded Italian pizza",
+          "image": "/images/calzone.jpg",
+          "basePrice": 8.5,
+          "categoryId": "cat-italian",
+          "sizes": [
+            { "id": "size28", "name": "SMALL", "price": 8.5 },
+            { "id": "size29", "name": "MEDIUM", "price": 11.0 },
+            { "id": "size30", "name": "LARGE", "price": 14.0 }
+          ],
+          "extras": [
+            { "id": "extra13", "name": "CHEESE", "price": 1.0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cat-veggie",
+      "name": "Veggie Pizzas",
+      "order": 3,
+      "products": [
+        {
+          "id": "pizza-vegdelight",
+          "name": "Veg Delight",
+          "description": "Loaded with fresh vegetables",
+          "image": "/images/vegdelight.jpg",
+          "basePrice": 6.0,
+          "categoryId": "cat-veggie",
+          "sizes": [
+            { "id": "size31", "name": "SMALL", "price": 6.0 },
+            { "id": "size32", "name": "MEDIUM", "price": 8.0 },
+            { "id": "size33", "name": "LARGE", "price": 10.0 }
+          ],
+          "extras": [
+            { "id": "extra14", "name": "ONION", "price": 0.7 },
+            { "id": "extra15", "name": "PEPPER", "price": 0.5 }
+          ]
+        },
+        {
+          "id": "pizza-mushroom",
+          "name": "Mushroom",
+          "description": "Mushroom toppings with mozzarella",
+          "image": "/images/mushroom.jpg",
+          "basePrice": 6.5,
+          "categoryId": "cat-veggie",
+          "sizes": [
+            { "id": "size34", "name": "SMALL", "price": 6.5 },
+            { "id": "size35", "name": "MEDIUM", "price": 8.5 },
+            { "id": "size36", "name": "LARGE", "price": 11.0 }
+          ],
+          "extras": [
+            { "id": "extra16", "name": "TOMATO", "price": 0.5 }
+          ]
+        },
+        {
+          "id": "pizza-pesto-veggie",
+          "name": "Pesto Veggie",
+          "description": "Vegetables with basil pesto sauce",
+          "image": "/images/pestoveggie.jpg",
+          "basePrice": 7.0,
+          "categoryId": "cat-veggie",
+          "sizes": [
+            { "id": "size37", "name": "SMALL", "price": 7.0 },
+            { "id": "size38", "name": "MEDIUM", "price": 9.5 },
+            { "id": "size39", "name": "LARGE", "price": 11.5 }
+          ],
+          "extras": [
+            { "id": "extra17", "name": "PEPPER", "price": 0.5 }
+          ]
+        },
+        {
+          "id": "pizza-spinach",
+          "name": "Spinach Ricotta",
+          "description": "Fresh spinach with ricotta cheese",
+          "image": "/images/spinach.jpg",
+          "basePrice": 8.0,
+          "categoryId": "cat-veggie",
+          "sizes": [
+            { "id": "size40", "name": "SMALL", "price": 8.0 },
+            { "id": "size41", "name": "MEDIUM", "price": 10.5 },
+            { "id": "size42", "name": "LARGE", "price": 13.0 }
+          ],
+          "extras": [
+            { "id": "extra18", "name": "ONION", "price": 0.7 }
+          ]
+        },
+        {
+          "id": "pizza-greek",
+          "name": "Greek Pizza",
+          "description": "Feta cheese and black olives",
+          "image": "/images/greek.jpg",
+          "basePrice": 7.5,
+          "categoryId": "cat-veggie",
+          "sizes": [
+            { "id": "size43", "name": "SMALL", "price": 7.5 },
+            { "id": "size44", "name": "MEDIUM", "price": 10.0 },
+            { "id": "size45", "name": "LARGE", "price": 12.5 }
+          ],
+          "extras": [
+            { "id": "extra19", "name": "TOMATO", "price": 0.5 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cat-premium",
+      "name": "Premium Pizzas",
+      "order": 4,
+      "products": [
+        {
+          "id": "pizza-bbq-chicken",
+          "name": "BBQ Chicken",
+          "description": "Chicken with BBQ sauce",
+          "image": "/images/bbqchicken.jpg",
+          "basePrice": 7.0,
+          "categoryId": "cat-premium",
+          "sizes": [
+            { "id": "size46", "name": "SMALL", "price": 7.0 },
+            { "id": "size47", "name": "MEDIUM", "price": 9.0 },
+            { "id": "size48", "name": "LARGE", "price": 12.0 }
+          ],
+          "extras": [
+            { "id": "extra20", "name": "BACON", "price": 1.5 }
+          ]
+        },
+        {
+          "id": "pizza-spicy-beef",
+          "name": "Spicy Beef",
+          "description": "Hot beef with jalapeno peppers",
+          "image": "/images/spicybeef.jpg",
+          "basePrice": 7.5,
+          "categoryId": "cat-premium",
+          "sizes": [
+            { "id": "size49", "name": "SMALL", "price": 7.5 },
+            { "id": "size50", "name": "MEDIUM", "price": 10.0 },
+            { "id": "size51", "name": "LARGE", "price": 13.0 }
+          ],
+          "extras": [
+            { "id": "extra21", "name": "ONION", "price": 0.7 }
+          ]
+        },
+        {
+          "id": "pizza-mexican",
+          "name": "Mexican",
+          "description": "Beans, chicken, and spicy sauce",
+          "image": "/images/mexican.jpg",
+          "basePrice": 8.0,
+          "categoryId": "cat-premium",
+          "sizes": [
+            { "id": "size52", "name": "SMALL", "price": 8.0 },
+            { "id": "size53", "name": "MEDIUM", "price": 10.5 },
+            { "id": "size54", "name": "LARGE", "price": 13.5 }
+          ],
+          "extras": [
+            { "id": "extra22", "name": "CHEESE", "price": 1.0 }
+          ]
+        },
+        {
+          "id": "pizza-buffalo",
+          "name": "Buffalo Chicken",
+          "description": "Chicken with spicy buffalo sauce",
+          "image": "/images/buffalo.jpg",
+          "basePrice": 7.0,
+          "categoryId": "cat-premium",
+          "sizes": [
+            { "id": "size55", "name": "SMALL", "price": 7.0 },
+            { "id": "size56", "name": "MEDIUM", "price": 9.5 },
+            { "id": "size57", "name": "LARGE", "price": 12.0 }
+          ],
+          "extras": [
+            { "id": "extra23", "name": "PEPPER", "price": 0.5 }
+          ]
+        },
+        {
+          "id": "pizza-meatfeast",
+          "name": "Meat Feast",
+          "description": "Loaded with beef, chicken, and pepperoni",
+          "image": "/images/meatfeast.jpg",
+          "basePrice": 9.0,
+          "categoryId": "cat-premium",
+          "sizes": [
+            { "id": "size58", "name": "SMALL", "price": 9.0 },
+            { "id": "size59", "name": "MEDIUM", "price": 12.0 },
+            { "id": "size60", "name": "LARGE", "price": 15.0 }
+          ],
+          "extras": [
+            { "id": "extra24", "name": "BACON", "price": 1.5 }
+          ]
+        }
+      ]
+    }
+  ]
+  
