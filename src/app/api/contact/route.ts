@@ -18,10 +18,6 @@ export async function POST(request: NextRequest) {
     // Validate the request body
     const validatedData = contactSchema.parse(body);
     const { name, email, message } = validatedData;
-
-    console.log('Sending email to:', 'ixonhosny@gmail.com');
-    console.log('From:', 'Pizza Shop <onboarding@resend.dev>');
-    console.log('Resend API Key exists:', !!process.env.RESEND_API_KEY);
     
     // Send email using Resend
     const { data, error } = await resend.emails.send({
